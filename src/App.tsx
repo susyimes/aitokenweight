@@ -66,7 +66,7 @@ function defaultState(): CalculatorState {
   const total = 8_620_000
 
   return {
-    handle: '@codemaster',
+    handle: 'susyimes',
     reportDate: todayIso(),
     inputTokens: 4_180_000,
     outputTokens: 3_820_000,
@@ -90,7 +90,13 @@ function readSavedState(): CalculatorState {
     }
 
     const parsed = JSON.parse(saved) as Partial<CalculatorState>
-    return { ...defaultState(), ...parsed }
+    const merged = { ...defaultState(), ...parsed }
+
+    if (merged.handle === '@codemaster' || merged.handle === '@developer') {
+      merged.handle = 'susyimes'
+    }
+
+    return merged
   } catch {
     return defaultState()
   }
@@ -199,7 +205,7 @@ function App() {
     const dataUrl = await toPng(reportRef.current, {
       cacheBust: true,
       pixelRatio: 2,
-      backgroundColor: '#f7f8fb',
+      backgroundColor: '#f4f1ea',
     })
     const link = document.createElement('a')
     link.download = `aitokenweight-${state.reportDate}.png`
@@ -220,6 +226,12 @@ function App() {
     setState(defaultState())
     setNotice('已恢复示例')
   }
+
+  const tokenBreakdown = [
+    { label: '输入', value: state.inputTokens, tone: 'input' },
+    { label: '输出', value: state.outputTokens, tone: 'output' },
+    { label: '缓存', value: state.cachedTokens, tone: 'cache' },
+  ]
 
   const metricItems = [
     {
@@ -312,7 +324,7 @@ function App() {
             />
           </label>
           <label>
-            昵称
+            开发者
             <input
               type="text"
               value={state.handle}
@@ -394,9 +406,6 @@ function App() {
 
       <section className="preview-stage" aria-label="Token 消耗海报预览">
         <div className="report-poster" ref={reportRef}>
-          <div className="soft-blob blue" aria-hidden="true" />
-          <div className="soft-blob pink" aria-hidden="true" />
-
           <header className="poster-header">
             <div className="poster-brand">
               <span className="brand-mark" aria-hidden="true" />
@@ -408,7 +417,7 @@ function App() {
               <strong>{state.reportDate.replaceAll('-', '.')}</strong>
               <span>
                 <User aria-hidden="true" />
-                {state.handle || '@developer'}
+                {state.handle || 'susyimes'}
               </span>
             </div>
           </header>
@@ -442,6 +451,14 @@ function App() {
               <span style={{ width: `${computed.progress}%` }} />
             </div>
             <strong>超过 {computed.percentile.toFixed(1)}% 的开发者</strong>
+            <div className="token-ledger" aria-label="Token 分布">
+              {tokenBreakdown.map((item) => (
+                <div className={`ledger-item ${item.tone}`} key={item.label}>
+                  <span>{item.label}</span>
+                  <strong>{formatNumber.format(item.value)}</strong>
+                </div>
+              ))}
+            </div>
           </section>
 
           <section className="energy-block">
