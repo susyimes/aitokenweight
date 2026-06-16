@@ -36,7 +36,7 @@ type CalculatorState = {
   history: number[]
 }
 
-const STORAGE_KEY = 'aitokensflux-calculator-state'
+const STORAGE_KEY = 'aitokenweight-state'
 
 const modelPresets: ModelPreset[] = [
   { id: 'agent', label: '代码智能体', multiplier: 1 },
@@ -202,7 +202,7 @@ function App() {
       backgroundColor: '#f7f8fb',
     })
     const link = document.createElement('a')
-    link.download = `aitokensflux-${state.reportDate}.png`
+    link.download = `aitokenweight-${state.reportDate}.png`
     link.href = dataUrl
     link.click()
     setNotice('PNG 已导出')
@@ -251,7 +251,7 @@ function App() {
         <div className="panel-brand">
           <span className="brand-mark" aria-hidden="true" />
           <span className="brand-word">
-            aitokens<span>flux</span>
+            aitoken<span>weight</span>
           </span>
         </div>
 
@@ -401,7 +401,7 @@ function App() {
             <div className="poster-brand">
               <span className="brand-mark" aria-hidden="true" />
               <span>
-                aitokens<span>flux</span>
+                aitoken<span>weight</span>
               </span>
             </div>
             <div className="poster-meta">
@@ -503,7 +503,7 @@ function App() {
             <div className="poster-brand mini">
               <span className="brand-mark" aria-hidden="true" />
               <span>
-                aitokens<span>flux</span>
+                aitoken<span>weight</span>
               </span>
             </div>
             <p>

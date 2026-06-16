@@ -1,4 +1,4 @@
-# aitokensflux Token 消耗计算器
+# aitokenweight Token 消耗计算器
 
 一个海报式 Token 消耗量计算网页。输入今日 token、估算能耗参数和报告信息后，可以生成类似社交分享卡片的结果，并支持复制摘要和导出 PNG。
 
