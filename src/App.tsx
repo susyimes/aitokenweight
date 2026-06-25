@@ -255,6 +255,13 @@ function clampNumber(value: number, min = 0, max = Number.MAX_SAFE_INTEGER) {
   return Math.min(max, Math.max(min, value))
 }
 
+function parseTokenInput(value: string) {
+  const normalized = value.replace(/[,\s_]/g, '')
+  const parsed = Number(normalized)
+
+  return clampNumber(parsed, 0)
+}
+
 function getLevel(totalTokens: number) {
   if (totalTokens >= 10_000_000) return '7'
   if (totalTokens >= 6_000_000) return '6'
@@ -404,9 +411,9 @@ function App() {
   }
 
   const quickValues = [
-    { label: '2.5M', value: 2_500_000 },
-    { label: '8.62M', value: 8_620_000 },
-    { label: '25M', value: 25_000_000 },
+    { label: '轻度 2.5M', value: 2_500_000 },
+    { label: '高产 8.62M', value: 8_620_000 },
+    { label: '爆肝 25M', value: 25_000_000 },
   ]
 
   return (
@@ -435,19 +442,17 @@ function App() {
             <label className="hero-input">
               <span>今日 Token 总量</span>
               <input
-                min="1"
-                step="1000"
-                type="number"
-                value={state.totalTokens}
+                inputMode="numeric"
+                type="text"
+                value={formatNumber.format(state.totalTokens)}
                 onChange={(event) =>
                   setState((current) => ({
                     ...current,
-                    totalTokens: Math.round(
-                      clampNumber(Number(event.target.value), 0),
-                    ),
+                    totalTokens: Math.round(parseTokenInput(event.target.value)),
                   }))
                 }
               />
+              <small>可直接粘贴 8620000、8,620,000 或带空格的数字。</small>
             </label>
 
             <div className="quick-values" aria-label="快捷 Token 总量">
@@ -480,6 +485,36 @@ function App() {
                 }
               />
             </label>
+
+            <details className="calc-details">
+              <summary>估算口径</summary>
+              <div className="calc-body">
+                <p>
+                  默认按 {DEFAULT_WH_PER_THOUSAND.toFixed(2)} Wh / 1K tokens
+                  换算，用来生成社交表达，不作为能耗审计。
+                </p>
+                <label>
+                  <span>Wh / 1K tokens</span>
+                  <input
+                    min="0.01"
+                    max="10"
+                    step="0.01"
+                    type="number"
+                    value={state.whPerThousand}
+                    onChange={(event) =>
+                      setState((current) => ({
+                        ...current,
+                        whPerThousand: clampNumber(
+                          Number(event.target.value),
+                          0.01,
+                          10,
+                        ),
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+            </details>
 
             <div className="compose-actions">
               <button
