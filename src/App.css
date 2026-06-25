@@ -169,6 +169,12 @@
   line-height: 1;
 }
 
+.hero-input small {
+  color: #777b74;
+  font-size: 0.82rem;
+  font-weight: 760;
+}
+
 .name-input input {
   font-size: 1.15rem;
 }
@@ -210,6 +216,63 @@
   padding: 0 15px;
   color: #161817;
   background: #ece6d7;
+}
+
+.calc-details {
+  overflow: hidden;
+  color: #4f554d;
+  background: rgba(255, 253, 247, 0.64);
+  border: 1px solid rgba(22, 24, 23, 0.12);
+  border-radius: 8px;
+}
+
+.calc-details summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  color: #161817;
+  font-size: 0.9rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.calc-body {
+  display: grid;
+  grid-template-columns: 1fr 176px;
+  gap: 14px;
+  padding: 0 14px 14px;
+}
+
+.calc-body p {
+  margin: 0;
+  color: #62665f;
+  font-size: 0.86rem;
+  font-weight: 760;
+  line-height: 1.55;
+}
+
+.calc-body label {
+  display: grid;
+  gap: 6px;
+}
+
+.calc-body label span {
+  color: #62665f;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.calc-body input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  color: #161817;
+  background: #fffdf7;
+  border: 1px solid rgba(22, 24, 23, 0.16);
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 850;
 }
 
 .quick-values button:hover,
@@ -785,6 +848,10 @@
   }
 
   .compose-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-body {
     grid-template-columns: 1fr;
   }
 

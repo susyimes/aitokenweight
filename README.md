@@ -22,3 +22,9 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## 产品化与部署
+
+- 产品化计划见 [`docs/PRODUCTIZATION.md`](docs/PRODUCTIZATION.md)
+- 阿里云 ECS 静态部署见 [`docs/DEPLOY_ALIYUN_ECS.md`](docs/DEPLOY_ALIYUN_ECS.md)
+- 可选 Docker/Nginx 部署文件：[`Dockerfile`](Dockerfile)、[`deploy/nginx.conf`](deploy/nginx.conf)
