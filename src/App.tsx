@@ -47,6 +47,12 @@ type EnergyMetric = {
   icon: keyof typeof metricIcons
 }
 
+type RankProfile = {
+  minTokens: number
+  level: number
+  title: string
+}
+
 const STORAGE_KEY = 'aitokenweight-state'
 const DEFAULT_TOTAL_TOKENS = 8_620_000
 const DEFAULT_WH_PER_THOUSAND = 0.4
@@ -171,6 +177,45 @@ const formatCompact = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
+const rankProfiles: RankProfile[] = [
+  { minTokens: 0, level: 1, title: 'Token 火花' },
+  { minTokens: 100_000, level: 2, title: '提示词学徒' },
+  { minTokens: 500_000, level: 3, title: '上下文骑士' },
+  { minTokens: 1_500_000, level: 4, title: '推理工匠' },
+  { minTokens: 3_000_000, level: 5, title: 'Token 掌舵者' },
+  { minTokens: 7_500_000, level: 6, title: '算力统领' },
+  { minTokens: 15_000_000, level: 7, title: '算力领主' },
+]
+
+const samplePresets: Array<
+  Pick<ReportState, 'handle' | 'totalTokens' | 'whPerThousand' | 'metricIds'>
+> = [
+  {
+    handle: 'susyimes',
+    totalTokens: DEFAULT_TOTAL_TOKENS,
+    whPerThousand: DEFAULT_WH_PER_THOUSAND,
+    metricIds: ['phone', 'ev', 'kettle'],
+  },
+  {
+    handle: 'debug-runner',
+    totalTokens: 420_000,
+    whPerThousand: 0.32,
+    metricIds: ['coffee', 'led', 'fan'],
+  },
+  {
+    handle: 'context-smith',
+    totalTokens: 2_860_000,
+    whPerThousand: 0.45,
+    metricIds: ['laptop', 'rice', 'tv'],
+  },
+  {
+    handle: 'compute-lord',
+    totalTokens: 24_500_000,
+    whPerThousand: 0.52,
+    metricIds: ['ac', 'fridge', 'washer'],
+  },
+]
+
 function todayIso() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -262,12 +307,12 @@ function parseTokenInput(value: string) {
   return clampNumber(parsed, 0)
 }
 
-function getLevel(totalTokens: number) {
-  if (totalTokens >= 10_000_000) return '7'
-  if (totalTokens >= 6_000_000) return '6'
-  if (totalTokens >= 2_000_000) return '5'
-  if (totalTokens >= 750_000) return '4'
-  return '3'
+function getRankProfile(totalTokens: number) {
+  return rankProfiles.reduce(
+    (current, profile) =>
+      totalTokens >= profile.minTokens ? profile : current,
+    rankProfiles[0],
+  )
 }
 
 function formatMetricValue(value: number) {
@@ -301,11 +346,13 @@ function App() {
   const [state, setState] = useState<ReportState>(readSavedState)
   const [page, setPage] = useState<Page>('compose')
   const [notice, setNotice] = useState('')
+  const [sampleIndex, setSampleIndex] = useState(0)
   const reportRef = useRef<HTMLDivElement>(null)
 
   const computed = useMemo(() => {
     const totalTokens = Math.round(clampNumber(state.totalTokens))
     const kwh = (totalTokens / 1_000) * state.whPerThousand * 0.001
+    const rank = getRankProfile(totalTokens)
     const percentile = Math.min(
       99.9,
       Math.max(1, 100 * (1 - Math.exp(-totalTokens / 2_000_000))),
@@ -328,7 +375,7 @@ function App() {
       progress: Math.min(100, Math.max(8, percentile)),
       trend,
       maxTrend: Math.max(...trend, 1),
-      level: getLevel(totalTokens),
+      rank,
       selectedMetrics:
         selectedMetrics.length === 3
           ? selectedMetrics
@@ -368,8 +415,17 @@ function App() {
   }
 
   const useSample = () => {
-    setState(defaultState())
-    setNotice('示例已填入')
+    const nextIndex = (sampleIndex + 1) % samplePresets.length
+    const sample = samplePresets[nextIndex]
+
+    setSampleIndex(nextIndex)
+    setState((current) => ({
+      ...current,
+      ...sample,
+      reportDate: todayIso(),
+      history: seedHistory(sample.totalTokens),
+    }))
+    setNotice(`已换用示例：${formatNumber.format(sample.totalTokens)} tokens`)
   }
 
   const rerollMetrics = () => {
@@ -386,6 +442,7 @@ function App() {
       .join('，')
     const summary = [
       `今日 Token 消耗：${formatNumber.format(computed.totalTokens)} tokens`,
+      `本次称号：${computed.rank.title} · LV.${computed.rank.level}`,
       `等效电量：${computed.kwh.toFixed(1)} 度电`,
       `超过 ${computed.percentile.toFixed(1)}% 的开发者`,
       `约等于：${metricLine}。`,
@@ -577,8 +634,8 @@ function App() {
             <div className="rank-badge">
               <Crown aria-hidden="true" />
               <div>
-                <strong>算力领主</strong>
-                <span>TOKEN · LV.{computed.level}</span>
+                <strong>{computed.rank.title}</strong>
+                <span>TOKEN · LV.{computed.rank.level}</span>
               </div>
             </div>
 
@@ -658,7 +715,7 @@ function App() {
               <div className="streak">
                 <Flame aria-hidden="true" />
                 <span>本次权重</span>
-                <strong>LV.{computed.level}</strong>
+                <strong>LV.{computed.rank.level}</strong>
               </div>
               <div className="weekly">
                 <div className="weekly-title">
