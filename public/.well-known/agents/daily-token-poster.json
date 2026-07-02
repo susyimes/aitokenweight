@@ -37,6 +37,16 @@
     },
     {
       "type": "Information",
+      "description": "Prompt that requires exact current token usage evidence and forbids demo/default usage values.",
+      "url": "/.well-known/prompts/current-token-usage.md"
+    },
+    {
+      "type": "Information",
+      "description": "Raw GitHub prompt URL for remote agents that cannot resolve relative .well-known paths.",
+      "url": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/prompts/current-token-usage.md"
+    },
+    {
+      "type": "Information",
       "description": "DailyTokenUsage JSON schema consumed by the poster renderer.",
       "url": "/.well-known/schemas/daily-token-usage.schema.json"
     },

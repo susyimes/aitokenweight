@@ -70,10 +70,15 @@
     "source": {
       "type": "string",
       "enum": [
+        "agent_runtime",
         "provider_api",
         "local_log",
         "manual"
       ]
+    },
+    "usageEvidence": {
+      "type": "string",
+      "description": "Human-readable evidence for the exact usage source, such as a runtime usage object, CLI token line, trace id, or provider usage query."
     }
   }
 }

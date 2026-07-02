@@ -18,6 +18,7 @@ When this app is served from any origin, these paths form the Agent Skill URL su
 /.well-known/skills/daily-token-poster.mcp.json
 /.well-known/schemas/daily-token-usage.schema.json
 /.well-known/schemas/daily-token-poster-result.schema.json
+/.well-known/prompts/current-token-usage.md
 ```
 
 When the app is not served as a website yet, a remote agent can use the public repository itself as the skill source:
@@ -45,8 +46,8 @@ The poster URL consumes a `DailyTokenUsage` object:
 {
   "date": "2026-07-02",
   "timezone": "Asia/Shanghai",
-  "provider": "manual",
-  "handle": "susyimes",
+  "provider": "agent-runtime",
+  "handle": "agent-name",
   "inputTokens": 5200000,
   "outputTokens": 3420000,
   "cachedTokens": 0,
@@ -54,11 +55,14 @@ The poster URL consumes a `DailyTokenUsage` object:
   "whPerThousand": 0.4,
   "metricIds": ["phone", "ev", "kettle"],
   "history": [4137600, 4913400, 3620400, 6034000, 4568600, 7068400, 8620000],
-  "source": "manual"
+  "source": "agent_runtime",
+  "usageEvidence": "Current session final usage line or API usage object"
 }
 ```
 
 If `metricIds` or `history` are omitted, the template uses stable defaults. `totalTokens` is preferred. If it is absent, the page can derive a total from `inputTokens + outputTokens + cachedTokens`.
+
+The numbers above are documentation examples only. A remote agent must not reuse them as defaults. Before rendering, the agent must read `/.well-known/prompts/current-token-usage.md` and obtain exact usage evidence for its current run/session. If exact usage is not available, it must return `usage_unavailable` and skip rendering.
 
 ## Agent Flow
 
@@ -67,13 +71,17 @@ skill link
   -> read /.well-known/agent-descriptions
   -> read the Agent Description
   -> inspect the MCP-compatible structured interface
+  -> read /.well-known/prompts/current-token-usage.md
   -> ask the user for token_usage:read before collecting provider or local usage
+  -> find exact current run/session usage evidence
   -> normalize to DailyTokenUsage
   -> encode DailyTokenUsage as base64url JSON
   -> open /?poster=1&data=<payload>
   -> screenshot .report-poster
   -> return poster.png + summary.json
 ```
+
+If exact usage evidence is unavailable, stop before the render step and return `usage_unavailable`.
 
 ## Validation
 
@@ -83,10 +91,10 @@ Run the local contract check:
 npm run validate:skill
 ```
 
-Generate a poster PNG from explicit token totals:
+Generate a poster PNG from a proven exact token total:
 
 ```bash
-npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png
+npm run render:poster -- --tokens <exact-current-total-tokens> --handle <agent-handle> --source agent_runtime --out dist/aitokenweight-poster.png
 ```
 
 Generate from a `DailyTokenUsage` JSON file:
@@ -106,10 +114,14 @@ git clone https://github.com/susyimes/aitokenweight.git
 cd aitokenweight
 npm ci
 npx playwright install chromium
-npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png
+cat public/.well-known/prompts/current-token-usage.md
+# If exact current token usage is available:
+npm run render:poster -- --usage usage.json --out dist/aitokenweight-poster.png
+# If exact current token usage is unavailable:
+# return usage_unavailable and do not render
 ```
 
-The skill manifest also exposes this as `repository`, `localCommands.bootstrapRemote`, and `remoteExecution.freshMachineFlow`, so an agent can discover the commands instead of relying on this document.
+The skill manifest also exposes this as `repository`, `prompts.currentTokenUsage`, `strictUsagePolicy`, `localCommands.bootstrapRemote`, and `remoteExecution.freshMachineFlow`, so an agent can discover the commands and constraints instead of relying on this document.
 
 Run a production build:
 
@@ -128,11 +140,11 @@ The current Agent Description has `proofStatus: unsigned-draft`. Before using it
 Codex CLI does not automatically inherit the Codex app browser tab. Pass the URL or repository path explicitly:
 
 ```bash
-codex --ask-for-approval never exec -C D:\aitokenweight -s workspace-write "Read public/.well-known/agent-descriptions, discover the Daily Token Poster skill, then generate a poster for 8,620,000 tokens by calling the local renderPoster command from the skill manifest. Put the image in dist/codex-cli-poster.png."
+codex --ask-for-approval never exec -C D:\aitokenweight -s workspace-write "Read public/.well-known/agent-descriptions, discover the Daily Token Poster skill, then read public/.well-known/prompts/current-token-usage.md. If you can prove exact current token usage for this run/session, write usage.json and render dist/codex-cli-poster.png. If you cannot prove exact current token usage, return usage_unavailable and do not render."
 ```
 
 To force Codex CLI to behave like a fresh remote machine, run it outside the repo and give it the GitHub URL:
 
 ```bash
-codex --ask-for-approval never exec -s workspace-write "Read https://github.com/susyimes/aitokenweight as an Agent Skill URL source. Clone it, inspect public/.well-known/agent-descriptions, follow the Daily Token Poster skill manifest, install dependencies, and generate dist/remote-agent-poster.png for 8,620,000 tokens."
+codex --ask-for-approval never exec -s workspace-write "Read https://github.com/susyimes/aitokenweight as an Agent Skill URL source. Clone it, inspect public/.well-known/agent-descriptions, follow the Daily Token Poster skill manifest, install dependencies, and read the current token usage prompt. Render only if exact current token usage is available; otherwise return usage_unavailable."
 ```

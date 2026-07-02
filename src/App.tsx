@@ -377,6 +377,10 @@ function readPosterUrlState(): ReportState | null {
   const inputTokens = readNumber(payload.inputTokens)
   const outputTokens = readNumber(payload.outputTokens)
   const cachedTokens = readNumber(payload.cachedTokens)
+  const hasTokenBreakdown =
+    inputTokens !== undefined ||
+    outputTokens !== undefined ||
+    cachedTokens !== undefined
   const explicitTotal =
     readNumber(payload.totalTokens) ??
     readNumber(payload.total_tokens) ??
@@ -384,9 +388,14 @@ function readPosterUrlState(): ReportState | null {
     readNumber(params.get('tokens'))
   const legacyTotal =
     (inputTokens ?? 0) + (outputTokens ?? 0) + (cachedTokens ?? 0)
-  const totalSource = explicitTotal ?? (legacyTotal || DEFAULT_TOTAL_TOKENS)
+  const totalSource = explicitTotal ?? (hasTokenBreakdown ? legacyTotal : undefined)
+
+  if (totalSource === undefined) {
+    return null
+  }
+
   const totalTokens = Math.round(
-    clampNumber(totalSource, 1),
+    clampNumber(totalSource, 0),
   )
   const metricIds = payload.metricIds?.filter((id) =>
     energyMetricPool.some((metric) => metric.id === id),

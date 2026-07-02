@@ -44,7 +44,7 @@ npm run validate:skill
 本地生成海报 PNG：
 
 ```bash
-npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png
+npm run render:poster -- --usage usage.json --out dist/aitokenweight-poster.png
 ```
 
 其它电脑上的 agent 可以按 manifest 中的 `remoteExecution.freshMachineFlow` 执行：
@@ -54,8 +54,12 @@ git clone https://github.com/susyimes/aitokenweight.git
 cd aitokenweight
 npm ci
 npx playwright install chromium
-npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png
+# First read public/.well-known/prompts/current-token-usage.md.
+# Render only if exact current token usage is available.
+npm run render:poster -- --usage usage.json --out dist/aitokenweight-poster.png
 ```
+
+如果 agent 拿不到当前 run/session 的准确 token usage，应返回 `usage_unavailable`，不要使用默认值、示例值或估算值生成海报。
 
 详细说明见 [`docs/AGENT_SKILL_URL.md`](docs/AGENT_SKILL_URL.md)。
 

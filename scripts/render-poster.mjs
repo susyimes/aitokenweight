@@ -4,18 +4,14 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const DEFAULT_USAGE = {
+const DEFAULT_USAGE_METADATA = {
   date: new Date().toISOString().slice(0, 10),
   timezone: 'Asia/Shanghai',
-  provider: 'manual',
+  provider: 'agent-runtime',
   handle: 'susyimes',
-  inputTokens: 5200000,
-  outputTokens: 3420000,
-  cachedTokens: 0,
-  totalTokens: 8620000,
   whPerThousand: 0.4,
   metricIds: ['phone', 'ev', 'kettle'],
-  source: 'manual',
+  source: 'agent_runtime',
 }
 
 function parseArgs(argv) {
@@ -60,31 +56,37 @@ function readUsage(args) {
   const explicitTotal = readNumber(
     args.tokens ?? args.totalTokens ?? fromFile.totalTokens,
   )
+  const hasTokenBreakdown =
+    inputTokens !== undefined ||
+    outputTokens !== undefined ||
+    cachedTokens !== undefined
   const legacyTotal =
     (inputTokens ?? 0) + (outputTokens ?? 0) + (cachedTokens ?? 0)
-  const totalSource = explicitTotal ?? (legacyTotal || DEFAULT_USAGE.totalTokens)
-  const totalTokens = Math.max(
-    1,
-    Math.round(totalSource),
-  )
+  const totalSource = explicitTotal ?? (hasTokenBreakdown ? legacyTotal : undefined)
+
+  if (totalSource === undefined) {
+    throw new Error(
+      'Missing exact token usage. Pass --tokens, --totalTokens, --usage with totalTokens, or an input/output/cached token breakdown. Do not use demo/default token values.',
+    )
+  }
+
+  const totalTokens = Math.max(0, Math.round(totalSource))
 
   return {
-    ...DEFAULT_USAGE,
+    ...DEFAULT_USAGE_METADATA,
     ...fromFile,
-    date: args.date ?? fromFile.date ?? DEFAULT_USAGE.date,
-    timezone: args.timezone ?? fromFile.timezone ?? DEFAULT_USAGE.timezone,
-    provider: args.provider ?? fromFile.provider ?? DEFAULT_USAGE.provider,
-    handle: args.handle ?? fromFile.handle ?? DEFAULT_USAGE.handle,
-    inputTokens: inputTokens ?? fromFile.inputTokens ?? DEFAULT_USAGE.inputTokens,
-    outputTokens:
-      outputTokens ?? fromFile.outputTokens ?? DEFAULT_USAGE.outputTokens,
-    cachedTokens:
-      cachedTokens ?? fromFile.cachedTokens ?? DEFAULT_USAGE.cachedTokens,
+    date: args.date ?? fromFile.date ?? DEFAULT_USAGE_METADATA.date,
+    timezone: args.timezone ?? fromFile.timezone ?? DEFAULT_USAGE_METADATA.timezone,
+    provider: args.provider ?? fromFile.provider ?? DEFAULT_USAGE_METADATA.provider,
+    handle: args.handle ?? fromFile.handle ?? DEFAULT_USAGE_METADATA.handle,
+    ...(inputTokens !== undefined ? { inputTokens } : {}),
+    ...(outputTokens !== undefined ? { outputTokens } : {}),
+    ...(cachedTokens !== undefined ? { cachedTokens } : {}),
     totalTokens,
     whPerThousand:
       readNumber(args.whPerThousand ?? fromFile.whPerThousand) ??
-      DEFAULT_USAGE.whPerThousand,
-    source: args.source ?? fromFile.source ?? DEFAULT_USAGE.source,
+      DEFAULT_USAGE_METADATA.whPerThousand,
+    source: args.source ?? fromFile.source ?? DEFAULT_USAGE_METADATA.source,
   }
 }
 

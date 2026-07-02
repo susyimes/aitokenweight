@@ -6,7 +6,7 @@
   "tools": [
     {
       "name": "collectUsage",
-      "description": "Collect one day of token usage from a provider API, local log, or manual input, then normalize it.",
+      "description": "Collect exact token usage for the current agent run/session from runtime telemetry, provider API, local log, or manual input, then normalize it. If exact current usage is unavailable, report usage_unavailable instead of using defaults.",
       "requiresHumanAuthorization": true,
       "requiredScopes": [
         "token_usage:read"
@@ -31,6 +31,7 @@
           "provider": {
             "type": "string",
             "enum": [
+              "agent-runtime",
               "openai",
               "anthropic",
               "gemini",
@@ -87,9 +88,11 @@
     "repository": "https://github.com/susyimes/aitokenweight",
     "cloneCommand": "git clone https://github.com/susyimes/aitokenweight.git",
     "bootstrapCommand": "npm ci && npx playwright install chromium",
+    "currentTokenUsagePrompt": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/prompts/current-token-usage.md",
+    "defaultTokenUsageAllowed": false,
     "posterUrlTemplate": "/?poster=1&data={base64url-json-DailyTokenUsage}",
     "localRenderCommand": "npm run render:poster -- --usage <daily-token-usage.json> --out dist/aitokenweight-poster.png",
-    "remoteRenderCommand": "git clone https://github.com/susyimes/aitokenweight.git && cd aitokenweight && npm ci && npx playwright install chromium && npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png",
+    "remoteRenderCommand": "git clone https://github.com/susyimes/aitokenweight.git && cd aitokenweight && npm ci && npx playwright install chromium && follow public/.well-known/prompts/current-token-usage.md; render only with exact current usage evidence",
     "implementationStatus": "manifest-and-template-entrypoint",
     "runtimeNote": "A host agent may implement collectUsage itself, call a remote usage service, or pass a manual DailyTokenUsage object directly to renderPoster."
   }

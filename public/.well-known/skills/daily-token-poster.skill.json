@@ -17,12 +17,30 @@
     "rawDiscoveryUrl": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/agent-descriptions",
     "rawSkillManifestUrl": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/skills/daily-token-poster.skill.json"
   },
+  "prompts": {
+    "currentTokenUsage": {
+      "url": "/.well-known/prompts/current-token-usage.md",
+      "rawUrl": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/prompts/current-token-usage.md",
+      "description": "Prompt for a remote agent to report exact current token usage or usage_unavailable without using defaults."
+    }
+  },
+  "strictUsagePolicy": {
+    "defaultTokenUsageAllowed": false,
+    "demoTokenUsageAllowedForRendering": false,
+    "onMissingExactUsage": "Return usage_unavailable and do not call renderPoster.",
+    "acceptedEvidence": [
+      "current request or run usage object",
+      "current session CLI/runtime final usage line",
+      "trace/span/local log entry for the current session",
+      "provider usage endpoint result scoped to this current run"
+    ]
+  },
   "inputs": {
     "date": "YYYY-MM-DD",
     "timezone": "IANA timezone, default Asia/Shanghai",
-    "provider": "openai|anthropic|gemini|local|manual|auto",
+    "provider": "agent-runtime|openai|anthropic|gemini|local|manual|auto",
     "handle": "string",
-    "usage": "DailyTokenUsage, optional when provider is manual or pre-collected"
+    "usage": "DailyTokenUsage with exact current token evidence; required before rendering"
   },
   "requires": [
     {
@@ -39,7 +57,7 @@
     "collectUsage": {
       "transport": "mcp",
       "tool": "collectUsage",
-      "description": "Read provider or local usage data for one calendar day and normalize it to DailyTokenUsage."
+      "description": "Read exact current run/session usage evidence and normalize it to DailyTokenUsage, or return usage_unavailable without rendering."
     },
     "renderPoster": {
       "transport": "mcp",
@@ -56,9 +74,9 @@
       "command": "npm run render:poster -- --usage <daily-token-usage.json> --out dist/aitokenweight-poster.png",
       "description": "Deterministically render poster.png from a DailyTokenUsage JSON file using the local browser template."
     },
-    "renderPosterManual": {
-      "command": "npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png",
-      "description": "Render a poster from explicit token totals when provider usage collection is not available."
+    "renderPosterFromExactTotal": {
+      "command": "npm run render:poster -- --tokens <exact-current-total-tokens> --handle <agent-handle> --source agent_runtime --out dist/aitokenweight-poster.png",
+      "description": "Render only after the agent has exact current token usage evidence. Do not substitute demo or default values."
     }
   },
   "remoteExecution": {
@@ -68,7 +86,9 @@
       "cd aitokenweight",
       "npm ci",
       "npx playwright install chromium",
-      "npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png"
+      "read .well-known prompt: public/.well-known/prompts/current-token-usage.md",
+      "if exact current token usage is available: write usage.json and run npm run render:poster -- --usage usage.json --out dist/aitokenweight-poster.png",
+      "if exact current token usage is unavailable: return usage_unavailable and do not render"
     ],
     "artifact": "dist/aitokenweight-poster.png",
     "notes": [
