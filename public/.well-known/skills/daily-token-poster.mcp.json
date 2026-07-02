@@ -1,0 +1,96 @@
+{
+  "schema": "mcp.toolset.v1",
+  "name": "aitokenweight-daily-token-poster",
+  "version": "1.0.0",
+  "description": "MCP-compatible tool definitions for the aitokenweight Daily Token Poster skill.",
+  "tools": [
+    {
+      "name": "collectUsage",
+      "description": "Collect one day of token usage from a provider API, local log, or manual input, then normalize it.",
+      "requiresHumanAuthorization": true,
+      "requiredScopes": [
+        "token_usage:read"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "date",
+          "timezone",
+          "provider"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "timezone": {
+            "type": "string",
+            "default": "Asia/Shanghai"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "openai",
+              "anthropic",
+              "gemini",
+              "local",
+              "manual",
+              "auto"
+            ]
+          },
+          "handle": {
+            "type": "string"
+          },
+          "manualTotalTokens": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "outputSchema": {
+        "$ref": "/.well-known/schemas/daily-token-usage.schema.json"
+      }
+    },
+    {
+      "name": "renderPoster",
+      "description": "Render DailyTokenUsage into a shareable PNG with the aitokenweight template.",
+      "requiresHumanAuthorization": false,
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "usage"
+        ],
+        "properties": {
+          "usage": {
+            "$ref": "/.well-known/schemas/daily-token-usage.schema.json"
+          },
+          "pixelRatio": {
+            "type": "number",
+            "default": 2,
+            "minimum": 1,
+            "maximum": 4
+          },
+          "targetSelector": {
+            "type": "string",
+            "default": ".report-poster"
+          }
+        }
+      },
+      "outputSchema": {
+        "$ref": "/.well-known/schemas/daily-token-poster-result.schema.json"
+      }
+    }
+  ],
+  "x-aitokenweight": {
+    "repository": "https://github.com/susyimes/aitokenweight",
+    "cloneCommand": "git clone https://github.com/susyimes/aitokenweight.git",
+    "bootstrapCommand": "npm ci && npx playwright install chromium",
+    "posterUrlTemplate": "/?poster=1&data={base64url-json-DailyTokenUsage}",
+    "localRenderCommand": "npm run render:poster -- --usage <daily-token-usage.json> --out dist/aitokenweight-poster.png",
+    "remoteRenderCommand": "git clone https://github.com/susyimes/aitokenweight.git && cd aitokenweight && npm ci && npx playwright install chromium && npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png",
+    "implementationStatus": "manifest-and-template-entrypoint",
+    "runtimeNote": "A host agent may implement collectUsage itself, call a remote usage service, or pass a manual DailyTokenUsage object directly to renderPoster."
+  }
+}

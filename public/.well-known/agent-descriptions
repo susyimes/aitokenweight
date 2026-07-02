@@ -1,0 +1,18 @@
+{
+  "@context": [
+    "https://schema.org",
+    "https://agent-network-protocol.com/ns/anp/v1"
+  ],
+  "@type": "CollectionPage",
+  "url": "/.well-known/agent-descriptions",
+  "name": "aitokenweight public agent descriptions",
+  "description": "ANP discovery entrypoint for public aitokenweight agent-facing capabilities.",
+  "items": [
+    {
+      "@type": "AgentDescription",
+      "name": "aitokenweight Daily Token Poster",
+      "description": "Discovers the Daily Token Poster skill manifest and structured actions.",
+      "url": "/.well-known/agents/daily-token-poster.json"
+    }
+  ]
+}

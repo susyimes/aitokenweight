@@ -1,0 +1,64 @@
+{
+  "protocolType": "ANP",
+  "protocolVersion": "1.1",
+  "type": "AgentDescription",
+  "url": "/.well-known/agents/daily-token-poster.json",
+  "name": "aitokenweight Daily Token Poster",
+  "owner": {
+    "type": "Person",
+    "name": "susyimes",
+    "url": "https://github.com/susyimes"
+  },
+  "description": "ANP-facing entrypoint for a skill that collects daily AI token usage, normalizes it, and renders an aitokenweight share poster. ANP provides discovery, identity, capability description, and invocation metadata; token collection and image rendering are application-level skill actions.",
+  "created": "2026-07-02T00:00:00Z",
+  "securityDefinitions": {
+    "user_grant": {
+      "scheme": "human-authorization",
+      "in": "none",
+      "name": "token_usage:read"
+    }
+  },
+  "security": "user_grant",
+  "Infomations": [
+    {
+      "type": "SoftwareSourceCode",
+      "description": "Public source repository and cloneable visual template implementation.",
+      "url": "https://github.com/susyimes/aitokenweight"
+    },
+    {
+      "type": "Information",
+      "description": "Raw discovery document for agents that consume the skill directly from GitHub.",
+      "url": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/agent-descriptions"
+    },
+    {
+      "type": "Information",
+      "description": "Agent Skill URL manifest for the Daily Token Poster capability.",
+      "url": "/.well-known/skills/daily-token-poster.skill.json"
+    },
+    {
+      "type": "Information",
+      "description": "DailyTokenUsage JSON schema consumed by the poster renderer.",
+      "url": "/.well-known/schemas/daily-token-usage.schema.json"
+    },
+    {
+      "type": "Information",
+      "description": "DailyTokenPosterResult JSON schema returned by renderPoster.",
+      "url": "/.well-known/schemas/daily-token-poster-result.schema.json"
+    }
+  ],
+  "interfaces": [
+    {
+      "type": "StructuredInterface",
+      "protocol": "MCP",
+      "version": "1.0",
+      "humanAuthorization": true,
+      "url": "/.well-known/skills/daily-token-poster.mcp.json",
+      "description": "MCP-compatible structured actions for collectUsage and renderPoster."
+    }
+  ],
+  "x-aitokenweight": {
+    "candidateDid": "did:wba:github.com:susyimes:aitokenweight:agents:daily-token-poster",
+    "proofStatus": "unsigned-draft",
+    "proofNote": "Add a DID proof before treating this as production identity verification evidence."
+  }
+}

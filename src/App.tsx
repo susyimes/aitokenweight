@@ -38,6 +38,23 @@ type ReportState = {
   metricIds: string[]
 }
 
+type PosterUrlPayload = Partial<ReportState> & {
+  cachedTokens?: number
+  date?: string
+  inputTokens?: number
+  outputTokens?: number
+  provider?: string
+  source?: string
+  timezone?: string
+  total_tokens?: number
+}
+
+type InitialAppState = {
+  page: Page
+  source: 'storage' | 'url'
+  state: ReportState
+}
+
 type EnergyMetric = {
   id: string
   label: string
@@ -292,12 +309,128 @@ function readSavedState(): ReportState {
   }
 }
 
+function readNumber(value: unknown) {
+  if (value === undefined || value === null || value === '') {
+    return undefined
+  }
+
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : Number(String(value).replace(/[,\s_]/g, ''))
+
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
 function clampNumber(value: number, min = 0, max = Number.MAX_SAFE_INTEGER) {
   if (!Number.isFinite(value)) {
     return min
   }
 
   return Math.min(max, Math.max(min, value))
+}
+
+function decodePosterPayload(value: string): PosterUrlPayload {
+  const trimmed = value.trim()
+
+  if (trimmed.startsWith('{')) {
+    return JSON.parse(trimmed) as PosterUrlPayload
+  }
+
+  const normalized = trimmed.replace(/-/g, '+').replace(/_/g, '/')
+  const padding =
+    normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4))
+  const binary = window.atob(normalized + padding)
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+
+  return JSON.parse(new TextDecoder().decode(bytes)) as PosterUrlPayload
+}
+
+function readPosterUrlState(): ReportState | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const params = new URLSearchParams(window.location.search)
+  const hasPosterIntent =
+    params.get('poster') === '1' ||
+    params.has('data') ||
+    params.has('usage') ||
+    params.has('tokens') ||
+    params.has('totalTokens')
+
+  if (!hasPosterIntent) {
+    return null
+  }
+
+  let payload: PosterUrlPayload = {}
+  const data = params.get('data') ?? params.get('usage')
+
+  if (data) {
+    try {
+      payload = decodePosterPayload(data)
+    } catch {
+      payload = {}
+    }
+  }
+
+  const inputTokens = readNumber(payload.inputTokens)
+  const outputTokens = readNumber(payload.outputTokens)
+  const cachedTokens = readNumber(payload.cachedTokens)
+  const explicitTotal =
+    readNumber(payload.totalTokens) ??
+    readNumber(payload.total_tokens) ??
+    readNumber(params.get('totalTokens')) ??
+    readNumber(params.get('tokens'))
+  const legacyTotal =
+    (inputTokens ?? 0) + (outputTokens ?? 0) + (cachedTokens ?? 0)
+  const totalSource = explicitTotal ?? (legacyTotal || DEFAULT_TOTAL_TOKENS)
+  const totalTokens = Math.round(
+    clampNumber(totalSource, 1),
+  )
+  const metricIds = payload.metricIds?.filter((id) =>
+    energyMetricPool.some((metric) => metric.id === id),
+  )
+  const history =
+    payload.history?.length === 7
+      ? payload.history.map((value) => Math.round(clampNumber(value)))
+      : seedHistory(totalTokens)
+
+  return {
+    ...defaultState(),
+    handle: payload.handle ?? params.get('handle') ?? defaultState().handle,
+    reportDate:
+      payload.reportDate ??
+      payload.date ??
+      params.get('date') ??
+      defaultState().reportDate,
+    totalTokens,
+    whPerThousand: clampNumber(
+      readNumber(payload.whPerThousand) ?? DEFAULT_WH_PER_THOUSAND,
+      0.01,
+      10,
+    ),
+    history,
+    metricIds: metricIds?.length === 3 ? metricIds : ['phone', 'ev', 'kettle'],
+  }
+}
+
+function readInitialAppState(): InitialAppState {
+  const urlState = readPosterUrlState()
+
+  if (urlState) {
+    return {
+      page: 'poster',
+      source: 'url',
+      state: urlState,
+    }
+  }
+
+  return {
+    page: 'compose',
+    source: 'storage',
+    state: readSavedState(),
+  }
 }
 
 function parseTokenInput(value: string) {
@@ -343,11 +476,15 @@ async function writeClipboard(text: string) {
 }
 
 function App() {
-  const [state, setState] = useState<ReportState>(readSavedState)
-  const [page, setPage] = useState<Page>('compose')
+  const [initialAppState] = useState<InitialAppState>(() =>
+    readInitialAppState(),
+  )
+  const [state, setState] = useState<ReportState>(initialAppState.state)
+  const [page, setPage] = useState<Page>(initialAppState.page)
   const [notice, setNotice] = useState('')
   const [sampleIndex, setSampleIndex] = useState(0)
   const reportRef = useRef<HTMLDivElement>(null)
+  const isUrlDriven = initialAppState.source === 'url'
 
   const computed = useMemo(() => {
     const totalTokens = Math.round(clampNumber(state.totalTokens))
@@ -384,8 +521,10 @@ function App() {
   }, [state.history, state.metricIds, state.totalTokens, state.whPerThousand])
 
   useEffect(() => {
+    if (isUrlDriven) return
+
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [state])
+  }, [isUrlDriven, state])
 
   useEffect(() => {
     if (!notice) return

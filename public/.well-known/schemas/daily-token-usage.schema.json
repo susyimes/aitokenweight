@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "/.well-known/schemas/daily-token-usage.schema.json",
+  "title": "DailyTokenUsage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "date",
+    "timezone",
+    "provider",
+    "handle",
+    "totalTokens",
+    "source"
+  ],
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "timezone": {
+      "type": "string",
+      "default": "Asia/Shanghai"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "handle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputTokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "outputTokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cachedTokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "totalTokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "whPerThousand": {
+      "type": "number",
+      "minimum": 0.01,
+      "maximum": 10,
+      "default": 0.4
+    },
+    "metricIds": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "history": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 7,
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "provider_api",
+        "local_log",
+        "manual"
+      ]
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "schema": "agent-skill-url.v1",
+  "id": "aitokenweight.daily-token-poster",
+  "name": "Daily Token Poster",
+  "version": "1.0.0",
+  "description": "Collect today's AI token usage and render a shareable aitokenweight poster image.",
+  "protocolEnvelope": {
+    "type": "ANP",
+    "agentDescription": "/.well-known/agents/daily-token-poster.json",
+    "structuredInterface": "/.well-known/skills/daily-token-poster.mcp.json"
+  },
+  "repository": {
+    "type": "git",
+    "cloneUrl": "https://github.com/susyimes/aitokenweight.git",
+    "webUrl": "https://github.com/susyimes/aitokenweight",
+    "defaultBranch": "main",
+    "rawDiscoveryUrl": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/agent-descriptions",
+    "rawSkillManifestUrl": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/skills/daily-token-poster.skill.json"
+  },
+  "inputs": {
+    "date": "YYYY-MM-DD",
+    "timezone": "IANA timezone, default Asia/Shanghai",
+    "provider": "openai|anthropic|gemini|local|manual|auto",
+    "handle": "string",
+    "usage": "DailyTokenUsage, optional when provider is manual or pre-collected"
+  },
+  "requires": [
+    {
+      "scope": "token_usage:read",
+      "humanAuthorization": true,
+      "reason": "Provider usage APIs and local logs may expose account or project activity. Ask the user before reading them."
+    }
+  ],
+  "outputs": [
+    "summary.json",
+    "poster.png"
+  ],
+  "actions": {
+    "collectUsage": {
+      "transport": "mcp",
+      "tool": "collectUsage",
+      "description": "Read provider or local usage data for one calendar day and normalize it to DailyTokenUsage."
+    },
+    "renderPoster": {
+      "transport": "mcp",
+      "tool": "renderPoster",
+      "description": "Render a DailyTokenUsage object into a PNG using the aitokenweight browser template."
+    }
+  },
+  "localCommands": {
+    "bootstrapRemote": {
+      "command": "git clone https://github.com/susyimes/aitokenweight.git && cd aitokenweight && npm ci && npx playwright install chromium",
+      "description": "Bootstrap the skill runtime on a new machine from the public GitHub repository."
+    },
+    "renderPoster": {
+      "command": "npm run render:poster -- --usage <daily-token-usage.json> --out dist/aitokenweight-poster.png",
+      "description": "Deterministically render poster.png from a DailyTokenUsage JSON file using the local browser template."
+    },
+    "renderPosterManual": {
+      "command": "npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png",
+      "description": "Render a poster from explicit token totals when provider usage collection is not available."
+    }
+  },
+  "remoteExecution": {
+    "strategy": "clone-and-run",
+    "freshMachineFlow": [
+      "git clone https://github.com/susyimes/aitokenweight.git",
+      "cd aitokenweight",
+      "npm ci",
+      "npx playwright install chromium",
+      "npm run render:poster -- --tokens 8620000 --handle susyimes --out dist/aitokenweight-poster.png"
+    ],
+    "artifact": "dist/aitokenweight-poster.png",
+    "notes": [
+      "Use rawDiscoveryUrl/rawSkillManifestUrl when the agent can read HTTP but cannot clone immediately.",
+      "Use cloneUrl when the agent needs bundled scripts, package-lock.json, and the browser renderer.",
+      "If a host machine already has Chrome available, render-poster can fall back to the local Chrome channel."
+    ]
+  },
+  "template": {
+    "name": "aitokenweight",
+    "source": "https://github.com/susyimes/aitokenweight",
+    "posterUrlTemplate": "/?poster=1&data={base64url-json-DailyTokenUsage}",
+    "targetSelector": ".report-poster",
+    "recommendedRenderer": "Open the posterUrlTemplate in a browser automation runtime and screenshot targetSelector at deviceScaleFactor 2."
+  },
+  "boundaries": {
+    "anpLayer": "Discovery, identity, interface metadata, and invocation envelope.",
+    "applicationLayer": "Token usage collection, usage normalization, and PNG rendering.",
+    "trustBoundary": "Energy conversion is a social estimate, not billing, telemetry, energy auditing, or carbon accounting."
+  }
+}

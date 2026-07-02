@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "/.well-known/schemas/daily-token-poster-result.schema.json",
+  "title": "DailyTokenPosterResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "posterPng",
+    "summary",
+    "usage"
+  ],
+  "properties": {
+    "posterPng": {
+      "type": "string",
+      "description": "Path, URL, or data URL for the rendered PNG."
+    },
+    "summary": {
+      "type": "string"
+    },
+    "usage": {
+      "$ref": "/.well-known/schemas/daily-token-usage.schema.json"
+    },
+    "template": {
+      "type": "string",
+      "default": "aitokenweight"
+    },
+    "renderedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
