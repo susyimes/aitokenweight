@@ -141,7 +141,7 @@ assert(
   'current token usage prompt must forbid demo defaults and define unavailable behavior',
 )
 assert(
-  currentUsagePrompt.includes('Return exactly one JSON object') &&
+  currentUsagePrompt.includes('exactly one JSON object and nothing else') &&
     currentUsagePrompt.includes('No Markdown fences'),
   'current token usage prompt must require strict JSON output',
 )
