@@ -140,6 +140,11 @@ assert(
     currentUsagePrompt.includes('usage_unavailable'),
   'current token usage prompt must forbid demo defaults and define unavailable behavior',
 )
+assert(
+  currentUsagePrompt.includes('Return exactly one JSON object') &&
+    currentUsagePrompt.includes('Do not wrap the JSON in Markdown fences'),
+  'current token usage prompt must require strict JSON output',
+)
 
 const sampleUsage = {
   date: '2026-07-02',

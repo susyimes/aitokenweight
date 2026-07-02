@@ -27,6 +27,13 @@ If exact usage is not available:
 3. Return `usage_unavailable`.
 4. List the telemetry sources you checked and what was missing.
 
+Output requirements:
+
+- Return exactly one JSON object.
+- Do not wrap the JSON in Markdown fences.
+- Do not add prose before or after the JSON.
+- Use `null` for `totalTokens` and `posterPath` when usage is unavailable.
+
 Output shape:
 
 ```json
@@ -34,6 +41,7 @@ Output shape:
   "status": "rendered | usage_unavailable",
   "totalTokens": "exact integer when rendered, otherwise null",
   "usageEvidence": "exact source, or unavailable reason",
-  "posterPath": "path when rendered"
+  "posterPath": "path when rendered, otherwise null",
+  "checkedSources": ["sources checked before deciding"]
 }
 ```
