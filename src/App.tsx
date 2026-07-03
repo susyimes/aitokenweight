@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BarChart3,
+  Bot,
   Car,
   Coffee,
   Copy,
@@ -494,6 +495,10 @@ function App() {
   const [sampleIndex, setSampleIndex] = useState(0)
   const reportRef = useRef<HTMLDivElement>(null)
   const isUrlDriven = initialAppState.source === 'url'
+  const agentPrompt = useMemo(() => {
+    const agentMdUrl = new URL('agent.md', window.location.href).href
+    return `读取 ${agentMdUrl} 并按其执行，帮我生成今日 token 消耗海报`
+  }, [])
 
   const computed = useMemo(() => {
     const totalTokens = Math.round(clampNumber(state.totalTokens))
@@ -579,6 +584,20 @@ function App() {
   const rerollMetrics = () => {
     setState((current) => ({ ...current, metricIds: randomMetricIds() }))
     setNotice('已换一组表达')
+  }
+
+  const copyAgentPrompt = async () => {
+    const copied = await writeClipboard(agentPrompt)
+    setNotice(copied ? 'AI 指令已复制，发给你的 agent 即可' : '复制被浏览器拦截')
+  }
+
+  const startOwnPoster = () => {
+    if (isUrlDriven) {
+      window.location.href = new URL('.', window.location.href).href
+      return
+    }
+
+    setPage('compose')
   }
 
   const copySummary = async () => {
@@ -740,6 +759,26 @@ function App() {
               {notice}
             </output>
           </form>
+
+          <aside className="agent-card" aria-label="让 AI 自动生成">
+            <div className="agent-card-head">
+              <Bot aria-hidden="true" />
+              <div>
+                <strong>懒得查？让你的 AI 自动生成</strong>
+                <span>
+                  复制这句话发给 Claude Code 等任意 agent，它会自动查询你今日的
+                  token 消耗并回你一张填好的海报链接。
+                </span>
+              </div>
+            </div>
+            <div className="agent-line">
+              <code>{agentPrompt}</code>
+              <button type="button" onClick={copyAgentPrompt}>
+                <Copy aria-hidden="true" />
+                复制
+              </button>
+            </div>
+          </aside>
         </section>
       ) : (
         <section className="result-page" aria-label="Token 海报结果">
@@ -902,6 +941,24 @@ function App() {
               <strong>susyimes</strong>
             </footer>
           </div>
+
+          <aside className="agent-cta" aria-label="生成我的今日海报">
+            <p>想要一张你自己的今日 Token 海报？</p>
+            <div className="agent-cta-actions">
+              <button
+                type="button"
+                className="primary-toolbar"
+                onClick={startOwnPoster}
+              >
+                <Zap aria-hidden="true" />
+                生成我的今日海报
+              </button>
+              <button type="button" onClick={copyAgentPrompt}>
+                <Bot aria-hidden="true" />
+                复制 AI 指令
+              </button>
+            </div>
+          </aside>
 
           <output className="notice result-notice" aria-live="polite">
             {notice}

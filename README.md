@@ -2,6 +2,26 @@
 
 一个两页式 Token 能耗海报生成器。第一页只输入 Token 总量和开发者名称，第二页生成可分享的结果海报，并支持随机切换常见能源表达方式、复制摘要和导出 PNG。
 
+## 快速开始（三选一）
+
+**① 一句话交给你的 AI**——复制这句发给 Claude Code 等任意 agent，它会自动查询你今日的 token 消耗并回你一张填好的海报链接：
+
+```text
+读取 https://susyimes.github.io/aitokenweight/agent.md 并按其执行，帮我生成今日 token 消耗海报
+```
+
+**② 一条命令直接生成**（读取本地 Claude Code 记录，无需 agent）：
+
+```bash
+npx aitokenweight
+```
+
+**③ 装成 Claude Code 技能**（回头客，之后每天说一句"今日海报"即可）：
+
+```text
+/plugin marketplace add susyimes/aitokenweight
+```
+
 ## 功能
 
 - 极简输入页：Token 总量、开发者名称

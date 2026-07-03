@@ -1,0 +1,14 @@
+{
+  "name": "aitokenweight",
+  "owner": {
+    "name": "susyimes",
+    "url": "https://github.com/susyimes"
+  },
+  "plugins": [
+    {
+      "name": "daily-token-poster",
+      "source": "./",
+      "description": "Collect today's exact AI token usage and turn it into a shareable aitokenweight energy poster."
+    }
+  ]
+}

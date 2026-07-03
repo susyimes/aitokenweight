@@ -1,0 +1,8 @@
+{
+  "name": "daily-token-poster",
+  "description": "Collect today's exact AI token usage and turn it into a shareable aitokenweight energy poster.",
+  "version": "0.1.0",
+  "author": {
+    "name": "susyimes"
+  }
+}
