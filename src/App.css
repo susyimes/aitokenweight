@@ -356,9 +356,7 @@
   overflow: hidden;
   padding: 46px 46px 30px;
   color: #161817;
-  background:
-    linear-gradient(90deg, #161817 0 12px, transparent 12px),
-    linear-gradient(180deg, #fffdf7 0%, #f7f3e8 100%);
+  background: linear-gradient(180deg, #fffdf7 0%, #f7f3e8 100%);
   border: 1px solid rgba(22, 24, 23, 0.12);
   border-radius: 8px;
   box-shadow: 0 28px 72px rgba(34, 38, 34, 0.2);
@@ -381,7 +379,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  left: 12px;
+  left: 0;
   height: 8px;
   background: linear-gradient(90deg, #4cc9f0, #4ade80, #facc15, #fb923c);
 }
