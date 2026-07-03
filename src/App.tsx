@@ -884,18 +884,29 @@ function App() {
   }
 
   const downloadReport = async () => {
-    if (!reportRef.current) return
+    const poster = reportRef.current
+    if (!poster) return
 
-    const dataUrl = await toPng(reportRef.current, {
-      cacheBust: true,
-      pixelRatio: 2,
-      backgroundColor: '#f4f1ea',
-    })
-    const link = document.createElement('a')
-    link.download = `aitokenweight-${state.reportDate}.png`
-    link.href = dataUrl
-    link.click()
-    setNotice('PNG 已导出')
+    poster.classList.add('export-compact')
+
+    try {
+      await new Promise<void>((resolve) =>
+        window.requestAnimationFrame(() => resolve()),
+      )
+
+      const dataUrl = await toPng(poster, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: '#f4f1ea',
+      })
+      const link = document.createElement('a')
+      link.download = `aitokenweight-${state.reportDate}.png`
+      link.href = dataUrl
+      link.click()
+      setNotice('PNG 已导出')
+    } finally {
+      poster.classList.remove('export-compact')
+    }
   }
 
   const quickValues = [

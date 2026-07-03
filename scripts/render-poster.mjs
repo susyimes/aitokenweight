@@ -203,6 +203,7 @@ try {
   })
   const poster = page.locator('.report-poster')
   await poster.waitFor({ state: 'visible', timeout: 15000 })
+  await poster.evaluate((element) => element.classList.add('export-compact'))
   await poster.screenshot({ path: outputPath })
 
   console.log(

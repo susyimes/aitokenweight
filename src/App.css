@@ -865,6 +865,257 @@
   height: 25px;
 }
 
+.report-poster.export-compact {
+  min-height: 0;
+  padding: 34px 44px 22px;
+}
+
+.report-poster.export-compact .poster-brand {
+  font-size: 1.5rem;
+}
+
+.report-poster.export-compact .poster-meta {
+  gap: 3px;
+  font-size: 0.86rem;
+}
+
+.report-poster.export-compact .poster-meta strong {
+  font-size: 0.96rem;
+}
+
+.report-poster.export-compact .usage-stamp {
+  top: 84px;
+  right: 40px;
+  padding: 7px 11px;
+  transform: rotate(9deg) scale(0.86);
+  transform-origin: top right;
+}
+
+.report-poster.export-compact .rank-badge {
+  min-height: 48px;
+  margin-top: 34px;
+  gap: 10px;
+  padding: 6px 18px;
+}
+
+.report-poster.export-compact .rank-badge svg {
+  width: 21px;
+  height: 21px;
+}
+
+.report-poster.export-compact .rank-badge strong {
+  font-size: 1.08rem;
+}
+
+.report-poster.export-compact .rank-badge span {
+  font-size: 0.68rem;
+}
+
+.report-poster.export-compact .rank-next {
+  gap: 4px;
+  padding-left: 12px;
+}
+
+.report-poster.export-compact .rank-next-track {
+  width: 78px;
+  height: 4px;
+}
+
+.report-poster.export-compact .rank-next small {
+  font-size: 0.54rem;
+}
+
+.report-poster.export-compact .token-hero {
+  margin-top: 24px;
+}
+
+.report-poster.export-compact .spread-title {
+  gap: 17px;
+  font-size: 0.86rem;
+}
+
+.report-poster.export-compact .spread-title.compact {
+  gap: 12px;
+}
+
+.report-poster.export-compact .token-hero h1 {
+  margin-top: 2px;
+  font-size: 5.85rem;
+}
+
+.report-poster.export-compact .token-hero p {
+  margin: 6px 0 12px;
+  font-size: 0.9rem;
+}
+
+.report-poster.export-compact .reading-line {
+  margin-top: 0;
+  font-size: 0.78rem;
+}
+
+.report-poster.export-compact .progress-track {
+  height: 10px;
+}
+
+.report-poster.export-compact .token-hero > strong {
+  margin-top: 10px;
+  font-size: 1rem;
+}
+
+.report-poster.export-compact .hero-quip {
+  margin-top: 5px;
+  font-size: 0.84rem;
+}
+
+.report-poster.export-compact .token-ledger {
+  margin-top: 17px;
+}
+
+.report-poster.export-compact .ledger-item {
+  gap: 3px;
+  padding: 8px 10px 7px;
+  border-radius: 6px;
+}
+
+.report-poster.export-compact .ledger-item span {
+  font-size: 0.68rem;
+}
+
+.report-poster.export-compact .ledger-item strong {
+  font-size: 0.84rem;
+}
+
+.report-poster.export-compact .breakdown-block {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.report-poster.export-compact .breakdown-bar {
+  height: 10px;
+}
+
+.report-poster.export-compact .breakdown-legend {
+  gap: 4px 10px;
+  font-size: 0.68rem;
+}
+
+.report-poster.export-compact .breakdown-quip {
+  font-size: 0.7rem;
+}
+
+.report-poster.export-compact .energy-block {
+  margin-top: 26px;
+}
+
+.report-poster.export-compact .energy-value {
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.report-poster.export-compact .energy-value svg {
+  width: 30px;
+  height: 30px;
+}
+
+.report-poster.export-compact .energy-value strong {
+  font-size: 4.05rem;
+}
+
+.report-poster.export-compact .energy-value span {
+  font-size: 1.28rem;
+}
+
+.report-poster.export-compact .energy-block p {
+  margin-top: 4px;
+  font-size: 0.84rem;
+}
+
+.report-poster.export-compact .metric-grid {
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.report-poster.export-compact .metric-card {
+  min-height: 112px;
+  padding: 12px 8px;
+  box-shadow: 5px 5px 0 rgba(22, 24, 23, 0.05);
+}
+
+.report-poster.export-compact .metric-icon {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 5px;
+}
+
+.report-poster.export-compact .metric-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.report-poster.export-compact .metric-card strong {
+  font-size: 2.18rem;
+}
+
+.report-poster.export-compact .metric-unit {
+  font-size: 0.8rem;
+}
+
+.report-poster.export-compact .metric-card p {
+  font-size: 0.78rem;
+}
+
+.report-poster.export-compact .trend-panel {
+  margin-top: 24px;
+  box-shadow: 6px 6px 0 rgba(22, 24, 23, 0.07);
+}
+
+.report-poster.export-compact .streak {
+  column-gap: 10px;
+  padding: 16px;
+}
+
+.report-poster.export-compact .streak svg {
+  width: 24px;
+  height: 24px;
+}
+
+.report-poster.export-compact .streak span {
+  font-size: 0.8rem;
+}
+
+.report-poster.export-compact .streak strong {
+  font-size: 2rem;
+}
+
+.report-poster.export-compact .streak-realm {
+  margin-top: 4px;
+  font-size: 0.7rem;
+}
+
+.report-poster.export-compact .poster-footer {
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 0.68rem;
+}
+
+.report-poster.export-compact .poster-qr img {
+  width: 56px;
+  height: 56px;
+}
+
+.report-poster.export-compact .poster-qr span {
+  font-size: 0.52rem;
+}
+
+.report-poster.export-compact .poster-brand.mini {
+  font-size: 0.96rem;
+}
+
+.report-poster.export-compact .poster-brand.mini .brand-mark {
+  width: 22px;
+  height: 22px;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 14px;
