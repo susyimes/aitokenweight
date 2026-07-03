@@ -4,7 +4,7 @@
   "description": "Turn today's AI token usage into a shareable aitokenweight poster URL. Reads local Claude Code transcripts via ccusage — exact numbers only, never estimates.",
   "type": "module",
   "bin": {
-    "aitokenweight": "./index.mjs"
+    "aitokenweight": "index.mjs"
   },
   "files": [
     "index.mjs",
