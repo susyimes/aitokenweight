@@ -85,6 +85,14 @@ const STORAGE_KEY = 'aitokenweight-state'
 const DEFAULT_TOTAL_TOKENS = 8_620_000
 const DEFAULT_WH_PER_THOUSAND = 0.4
 
+// 分项能耗模型（Wh / 1K tokens，含数据中心开销）。输出 token 需对全上下文
+// 完整前向推理成本最高；输入走并行 prefill；缓存读取近乎只有显存带宽成本。
+// 量级按 Google / Epoch AI 2025 公布的单次请求 0.24–0.34 Wh 校准。
+// 仅在 payload 携带输入/输出/缓存分项时启用；无分项时退回混合系数。
+const WH_PER_1K_INPUT = 0.3
+const WH_PER_1K_OUTPUT = 0.9
+const WH_PER_1K_CACHED = 0.03
+
 const metricIcons = {
   phone: SmartphoneCharging,
   car: Car,
@@ -638,12 +646,11 @@ function App() {
   const isUrlDriven = initialAppState.source === 'url'
   const agentPrompt = useMemo(() => {
     const agentMdUrl = new URL('agent.md', window.location.href).href
-    return `读取 ${agentMdUrl} 并按其执行，帮我生成今日 token 消耗海报；优先用你运行时能看到的 token 用量，拿不到全天数据就用当前会话消耗（scope 设为 session）并向我说明；最后直接回复填好的海报链接，不要生成图片。`
+    return `读取 ${agentMdUrl} 并按其执行，帮我生成今日 token 消耗海报`
   }, [])
 
   const computed = useMemo(() => {
     const totalTokens = Math.round(clampNumber(state.totalTokens))
-    const kwh = (totalTokens / 1_000) * state.whPerThousand * 0.001
     const rank = rankFor(totalTokens)
     const percentile = Math.min(
       99.9,
@@ -675,6 +682,15 @@ function App() {
         : null
     const cacheShare = breakdown ? breakdown[2].share : 0
 
+    const kwh = breakdown
+      ? ((breakdownValues[0] * WH_PER_1K_INPUT +
+          breakdownValues[1] * WH_PER_1K_OUTPUT +
+          breakdownValues[2] * WH_PER_1K_CACHED) /
+          1_000) *
+        0.001
+      : (totalTokens / 1_000) * state.whPerThousand * 0.001
+    const kwhLabel = kwh.toFixed(kwh >= 0.095 ? 1 : 2)
+
     const maxTrend = Math.max(...trend, 1)
     const peakIndex = trend.indexOf(Math.max(...trend))
     const isSession = state.scope === 'session'
@@ -688,6 +704,7 @@ function App() {
       totalTokens,
       displayMillions: totalTokens / 1_000_000,
       kwh,
+      kwhLabel,
       percentile,
       progress: Math.min(100, Math.max(8, percentile)),
       trend,
@@ -808,7 +825,7 @@ function App() {
     const summary = [
       `${computed.isSession ? '本次会话' : '今日'} Token 消耗：${formatNumber.format(computed.totalTokens)} tokens`,
       `本次称号：${computed.rank.title} · LV.${computed.rank.level}`,
-      `等效电量：${computed.kwh.toFixed(1)} 度电`,
+      `等效电量：${computed.kwhLabel} 度电`,
       `超过 ${computed.percentile.toFixed(1)}% 的开发者`,
       `约等于：${metricLine}。`,
     ].join('\n')
@@ -1067,7 +1084,7 @@ function App() {
                   </div>
                   <div className="ledger-item plain">
                     <span>等效电量</span>
-                    <strong>{computed.kwh.toFixed(1)} 度</strong>
+                    <strong>{computed.kwhLabel} 度</strong>
                   </div>
                   <div className="ledger-item plain">
                     <span>结果表达</span>
@@ -1113,7 +1130,7 @@ function App() {
               </div>
               <div className="energy-value">
                 <Zap aria-hidden="true" />
-                <strong>{computed.kwh.toFixed(1)}</strong>
+                <strong>{computed.kwhLabel}</strong>
                 <span>度电</span>
               </div>
               <p>{computed.burnLine}</p>
@@ -1177,7 +1194,7 @@ function App() {
                   aitoken<span>weight</span>
                 </span>
               </div>
-              <p>等效电量为趣味换算，仅供娱乐</p>
+              <p>等效电量按公开行业研究折算，仅供娱乐</p>
               <strong>susyimes</strong>
             </footer>
           </div>
