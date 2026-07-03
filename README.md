@@ -4,11 +4,13 @@
 
 ## 快速开始（三选一）
 
-**① 一句话交给你的 AI**——复制这句发给 Claude Code 等任意 agent，它会自动查询你今日的 token 消耗并回你一张填好的海报链接：
+**① 把链接直接发给你的 AI**——页面里埋了给 agent 的完整指令，Claude Code / Codex 等收到后会自动查询你的 token 消耗并回你一张填好的海报链接：
 
 ```text
-读取 https://susyimes.github.io/aitokenweight/agent.md 并按其执行，帮我生成今日 token 消耗海报
+https://susyimes.github.io/aitokenweight/
 ```
+
+（若对方 agent 只是总结了网页，补一句「按网页里的说明执行」即可。）
 
 **② 一条命令直接生成**（读取本地 Claude Code 记录，无需 agent）：
 

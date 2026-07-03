@@ -20,11 +20,12 @@ from demo, default, or estimated numbers — exact evidence or `usage_unavailabl
    and `agent` is `all`. Map: `inputTokens`, `outputTokens`,
    `cachedTokens = cacheReadTokens + cacheCreationTokens`, `totalTokens`,
    `history = last ≤7 days of totalTokens`, `source: "local_log"`.
-2. **Runtime usage object**: if the current agent runtime exposes cumulative usage
-   for this session (final usage line, telemetry, trace), use it with
-   `source: "agent_runtime"`.
-3. **Provider usage API**: if the user has provided an admin/usage API key, query
+2. **Provider usage API**: if the user has provided an admin/usage API key, query
    the provider usage endpoint scoped to today, `source: "provider_api"`.
+3. **Current-session fallback**: if daily data is unreachable (remote/sandboxed
+   runtime), use this session's cumulative usage instead with
+   `scope: "session"`, `source: "agent_runtime"`, and tell the user the poster
+   covers this session only, not the whole day.
 4. **Ask the user**: exact numbers only, `source: "manual"`.
 
 Before reading provider APIs or local logs, confirm the user authorizes
@@ -66,8 +67,8 @@ as base64url, and build the poster URL. Verify before sharing: decode the
 `<origin>/?poster=1&data=<base64url>`
 
 - **Hosted origin available** (preferred, zero setup): give the user the full URL —
-  it IS the shareable output. Optionally screenshot `.report-poster` at
-  deviceScaleFactor 2 for a PNG.
+  it IS the deliverable. Do NOT screenshot or render a PNG unless the user
+  explicitly asks for an image file.
 - **No hosted origin**: clone-and-run —
   `git clone https://github.com/susyimes/aitokenweight.git && cd aitokenweight && npm ci && npx playwright install chromium`,
   write `usage.json`, then

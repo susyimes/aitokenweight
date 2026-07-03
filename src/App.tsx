@@ -41,6 +41,7 @@ type ReportState = {
   outputTokens?: number
   cachedTokens?: number
   source?: string
+  scope?: string
 }
 
 type PosterUrlPayload = Partial<ReportState> & {
@@ -50,6 +51,7 @@ type PosterUrlPayload = Partial<ReportState> & {
   outputTokens?: number
   provider?: string
   source?: string
+  scope?: string
   timezone?: string
   total_tokens?: number
 }
@@ -443,6 +445,7 @@ function salvagePosterPayload(text: string): PosterUrlPayload {
     provider: readField('provider'),
     handle: readField('handle'),
     source: readField('source'),
+    scope: readField('scope'),
     inputTokens: readNumber(readField('inputTokens')),
     outputTokens: readNumber(readField('outputTokens')),
     cachedTokens: readNumber(readField('cachedTokens')),
@@ -533,13 +536,16 @@ function readPosterUrlState(): ReportState | null {
   const metricIds = payload.metricIds?.filter((id) =>
     energyMetricPool.some((metric) => metric.id === id),
   )
+  const scope = payload.scope === 'session' ? 'session' : undefined
   const rawHistory = payload.history
     ?.map((value) => Math.round(clampNumber(value)))
     .slice(-7)
   const history =
     rawHistory && rawHistory.length > 0
       ? [...Array<number>(7 - rawHistory.length).fill(0), ...rawHistory]
-      : seedHistory(totalTokens)
+      : scope === 'session'
+        ? [0, 0, 0, 0, 0, 0, totalTokens]
+        : seedHistory(totalTokens)
 
   return {
     ...defaultState(),
@@ -561,6 +567,7 @@ function readPosterUrlState(): ReportState | null {
     ...(outputTokens !== undefined ? { outputTokens } : {}),
     ...(cachedTokens !== undefined ? { cachedTokens } : {}),
     ...(typeof payload.source === 'string' ? { source: payload.source } : {}),
+    ...(scope ? { scope } : {}),
   }
 }
 
@@ -626,10 +633,10 @@ function App() {
   const [sampleIndex, setSampleIndex] = useState(0)
   const reportRef = useRef<HTMLDivElement>(null)
   const isUrlDriven = initialAppState.source === 'url'
-  const agentPrompt = useMemo(() => {
-    const agentMdUrl = new URL('agent.md', window.location.href).href
-    return `读取 ${agentMdUrl} 并按其执行，帮我生成今日 token 消耗海报`
-  }, [])
+  const agentPrompt = useMemo(
+    () => new URL('.', window.location.href).href,
+    [],
+  )
 
   const computed = useMemo(() => {
     const totalTokens = Math.round(clampNumber(state.totalTokens))
@@ -667,8 +674,14 @@ function App() {
 
     const maxTrend = Math.max(...trend, 1)
     const peakIndex = trend.indexOf(Math.max(...trend))
+    const isSession = state.scope === 'session'
 
     return {
+      isSession,
+      heroTitle: isSession ? '本次会话消耗' : '今日TOKEN消耗',
+      burnLine: isSession
+        ? '这次会话为代码燃烧的 AI 算力'
+        : '今天我为代码燃烧的 AI 算力',
       totalTokens,
       displayMillions: totalTokens / 1_000_000,
       kwh,
@@ -770,7 +783,7 @@ function App() {
 
   const copyAgentPrompt = async () => {
     const copied = await writeClipboard(agentPrompt)
-    setNotice(copied ? 'AI 指令已复制，发给你的 agent 即可' : '复制被浏览器拦截')
+    setNotice(copied ? '链接已复制，直接发给你的 AI 即可' : '复制被浏览器拦截')
   }
 
   const startOwnPoster = () => {
@@ -790,7 +803,7 @@ function App() {
       })
       .join('，')
     const summary = [
-      `今日 Token 消耗：${formatNumber.format(computed.totalTokens)} tokens`,
+      `${computed.isSession ? '本次会话' : '今日'} Token 消耗：${formatNumber.format(computed.totalTokens)} tokens`,
       `本次称号：${computed.rank.title} · LV.${computed.rank.level}`,
       `等效电量：${computed.kwh.toFixed(1)} 度电`,
       `超过 ${computed.percentile.toFixed(1)}% 的开发者`,
@@ -946,10 +959,12 @@ function App() {
             <div className="agent-card-head">
               <Bot aria-hidden="true" />
               <div>
-                <strong>懒得查？让你的 AI 自动生成</strong>
+                <strong>懒得查？把链接丢给你的 AI</strong>
                 <span>
-                  复制这句话发给 Claude Code 等任意 agent，它会自动查询你今日的
-                  token 消耗并回你一张填好的海报链接。
+                  把下面的链接直接发给 Claude Code / Codex 等任意
+                  agent——页面里埋了给 AI 的指令，它会自动查询你的 token
+                  消耗并回你一张填好的海报链接。若对方只是总结了网页，补一句
+                  「按网页里的说明执行」即可。
                 </span>
               </div>
             </div>
@@ -1029,16 +1044,10 @@ function App() {
             </div>
 
             <section className="token-hero">
-              <div className="spread-title" aria-label="今日 TOKEN 消耗">
-                <span>今</span>
-                <span>日</span>
-                <span>T</span>
-                <span>O</span>
-                <span>K</span>
-                <span>E</span>
-                <span>N</span>
-                <span>消</span>
-                <span>耗</span>
+              <div className="spread-title" aria-label={computed.heroTitle}>
+                {Array.from(computed.heroTitle).map((char, index) => (
+                  <span key={`${char}-${index}`}>{char}</span>
+                ))}
               </div>
               <h1>{formatCompact.format(computed.displayMillions)}M</h1>
               <p>{formatNumber.format(computed.totalTokens)} tokens</p>
@@ -1117,7 +1126,7 @@ function App() {
                 <strong>{computed.kwh.toFixed(1)}</strong>
                 <span>度电</span>
               </div>
-              <p>今天我为代码燃烧的 AI 算力</p>
+              <p>{computed.burnLine}</p>
             </section>
 
             <section className="metric-grid" aria-label="等效消耗">
@@ -1141,7 +1150,7 @@ function App() {
             <section className="trend-panel">
               <div className="streak">
                 <Flame aria-hidden="true" />
-                <span>今日火力</span>
+                <span>{computed.isSession ? '本次火力' : '今日火力'}</span>
                 <strong>LV.{computed.rank.level}</strong>
                 <small className="streak-realm">{computed.rank.title}</small>
               </div>
@@ -1194,7 +1203,7 @@ function App() {
               </button>
               <button type="button" onClick={copyAgentPrompt}>
                 <Bot aria-hidden="true" />
-                复制 AI 指令
+                复制 AI 链接
               </button>
             </div>
           </aside>
