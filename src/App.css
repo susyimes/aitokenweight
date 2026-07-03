@@ -426,7 +426,7 @@
 
 .rank-badge {
   width: max-content;
-  min-width: 246px;
+  min-width: 300px;
   min-height: 58px;
   margin: 64px auto 0;
   display: flex;
@@ -1216,10 +1216,67 @@
   text-align: center;
 }
 
+.rank-next {
+  display: grid;
+  gap: 6px;
+  margin-left: 4px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.rank-next-track {
+  width: 96px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.rank-next-track span {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background: #f3c75b;
+  border-radius: 999px;
+}
+
+.rank-next small {
+  color: #b7b8ad;
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.streak-realm {
+  grid-column: 2;
+  margin-top: 7px;
+  color: #f3c75b;
+  font-size: 0.82rem;
+  font-weight: 850;
+  letter-spacing: 3px;
+}
+
 @media (max-width: 720px) {
   .usage-stamp {
     top: 96px;
     right: 16px;
     transform: rotate(9deg) scale(0.82);
+  }
+
+  .rank-badge {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 10px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px 18px;
+  }
+
+  .rank-next {
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0;
+    justify-items: center;
   }
 }

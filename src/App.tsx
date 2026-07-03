@@ -70,9 +70,13 @@ type EnergyMetric = {
 }
 
 type RankProfile = {
-  minTokens: number
   level: number
   title: string
+  realm: string
+  layer: number
+  progress: number
+  remaining: number
+  capped: boolean
 }
 
 const STORAGE_KEY = 'aitokenweight-state'
@@ -253,15 +257,40 @@ function trendDayLabels(reportDate: string) {
   })
 }
 
-const rankProfiles: RankProfile[] = [
-  { minTokens: 0, level: 1, title: 'Token 火花' },
-  { minTokens: 100_000, level: 2, title: '提示词学徒' },
-  { minTokens: 500_000, level: 3, title: '上下文骑士' },
-  { minTokens: 1_500_000, level: 4, title: '推理工匠' },
-  { minTokens: 3_000_000, level: 5, title: 'Token 掌舵者' },
-  { minTokens: 7_500_000, level: 6, title: '算力统领' },
-  { minTokens: 15_000_000, level: 7, title: '算力领主' },
+// 每 1000 万 tokens 一级，共 100 级；十级一档，按供电规模从火花升到戴森球
+const TOKENS_PER_LEVEL = 10_000_000
+const rankRealms = [
+  '火花',
+  '干电池',
+  '充电宝',
+  '电动车',
+  '变电站',
+  '风电场',
+  '水电站',
+  '火电厂',
+  '核电站',
+  '戴森球',
 ]
+const cnNumerals = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+
+function rankFor(totalTokens: number): RankProfile {
+  const rawLevel = Math.floor(totalTokens / TOKENS_PER_LEVEL) + 1
+  const level = Math.min(100, rawLevel)
+  const capped = rawLevel > 100
+  const realm = rankRealms[Math.floor((level - 1) / 10)]
+  const layer = ((level - 1) % 10) + 1
+  const withinLevel = totalTokens % TOKENS_PER_LEVEL
+
+  return {
+    level,
+    title: `${realm}·${cnNumerals[layer - 1]}阶`,
+    realm,
+    layer,
+    progress: capped ? 100 : (withinLevel / TOKENS_PER_LEVEL) * 100,
+    remaining: capped ? 0 : TOKENS_PER_LEVEL - withinLevel,
+    capped,
+  }
+}
 
 const samplePresets: Array<
   Pick<ReportState, 'handle' | 'totalTokens' | 'whPerThousand' | 'metricIds'>
@@ -560,14 +589,6 @@ function parseTokenInput(value: string) {
   return clampNumber(parsed, 0)
 }
 
-function getRankProfile(totalTokens: number) {
-  return rankProfiles.reduce(
-    (current, profile) =>
-      totalTokens >= profile.minTokens ? profile : current,
-    rankProfiles[0],
-  )
-}
-
 function formatMetricValue(value: number) {
   if (value >= 100) return Math.round(value).toString()
   if (value >= 10) return value.toFixed(1).replace(/\.0$/, '')
@@ -613,7 +634,7 @@ function App() {
   const computed = useMemo(() => {
     const totalTokens = Math.round(clampNumber(state.totalTokens))
     const kwh = (totalTokens / 1_000) * state.whPerThousand * 0.001
-    const rank = getRankProfile(totalTokens)
+    const rank = rankFor(totalTokens)
     const percentile = Math.min(
       99.9,
       Math.max(1, 100 * (1 - Math.exp(-totalTokens / 2_000_000))),
@@ -993,6 +1014,18 @@ function App() {
                 <strong>{computed.rank.title}</strong>
                 <span>TOKEN · LV.{computed.rank.level}</span>
               </div>
+              <div className="rank-next">
+                <div className="rank-next-track">
+                  <span style={{ width: `${computed.rank.progress}%` }} />
+                </div>
+                <small>
+                  {computed.rank.capped
+                    ? '已满级 · 恒星为你打工'
+                    : `距 LV.${computed.rank.level + 1} 还需 ${compactTokens(
+                        computed.rank.remaining,
+                      )}`}
+                </small>
+              </div>
             </div>
 
             <section className="token-hero">
@@ -1108,8 +1141,9 @@ function App() {
             <section className="trend-panel">
               <div className="streak">
                 <Flame aria-hidden="true" />
-                <span>本次权重</span>
+                <span>今日火力</span>
                 <strong>LV.{computed.rank.level}</strong>
+                <small className="streak-realm">{computed.rank.title}</small>
               </div>
               <div className="weekly">
                 <div className="weekly-title">
