@@ -60,7 +60,9 @@ Always set `usageEvidence` to the concrete evidence source you used.
 
 ## Step 3 — Fill the template and share
 
-Encode the object as base64url JSON and build the poster URL:
+Serialize with a real JSON encoder (never hand-concatenate the string), encode
+as base64url, and build the poster URL. Verify before sharing: decode the
+`data` param back and `JSON.parse` it — rebuild if it fails.
 `<origin>/?poster=1&data=<base64url>`
 
 - **Hosted origin available** (preferred, zero setup): give the user the full URL —

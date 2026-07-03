@@ -64,8 +64,9 @@ Full schema: [.well-known/schemas/daily-token-usage.schema.json](./.well-known/s
 
 ## Step 3 — Fill the page
 
-Serialize the object as compact JSON, encode it as **base64url** (no padding),
-and build the filled page URL **on this same origin**:
+Serialize the object with a real JSON encoder (`JSON.stringify` or equivalent —
+**never hand-concatenate the JSON string**), encode it as **base64url** (no
+padding), and build the filled page URL **on this same origin**:
 
 ```
 <this site's origin and base path>/?poster=1&data=<base64url>
@@ -73,6 +74,10 @@ and build the filled page URL **on this same origin**:
 
 That URL renders the poster directly in the browser. It IS the shareable
 output — give it to the user.
+
+Verify before sharing: decode your URL's `data` param and `JSON.parse` the
+result. If parsing fails, rebuild the payload — do not hand the user a broken
+link. Also make sure the URL is on ONE line with no whitespace inside.
 
 Optional PNG: open the URL in a browser automation runtime (viewport
 900×1300, deviceScaleFactor 2), wait for `.report-poster`, screenshot that

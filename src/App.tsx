@@ -389,21 +389,65 @@ function clampNumber(value: number, min = 0, max = Number.MAX_SAFE_INTEGER) {
   return Math.min(max, Math.max(min, value))
 }
 
-function decodePosterPayload(value: string): PosterUrlPayload {
-  const trimmed = value.trim()
+// Agent 手拼 JSON 偶尔会拼坏；解析失败时按字段正则抢救，能救多少救多少。
+function salvagePosterPayload(text: string): PosterUrlPayload {
+  const readField = (key: string) => {
+    const numeric = text.match(
+      new RegExp(`"${key}"\\s*:\\s*([0-9][0-9,._\\s]*)`),
+    )
+    if (numeric) return numeric[1]
 
-  if (trimmed.startsWith('{')) {
-    return JSON.parse(trimmed) as PosterUrlPayload
+    const quoted = text.match(new RegExp(`"${key}"\\s*:\\s*"([^"]*)"`))
+    return quoted?.[1]
   }
 
-  const normalized = trimmed.replace(/-/g, '+').replace(/_/g, '/')
-  const padding =
-    normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4))
-  const binary = window.atob(normalized + padding)
-  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+  const historyMatch = text.match(/"history"\s*:\s*\[([^\]]*)\]/)
+  const history = historyMatch
+    ? historyMatch[1]
+        .split(',')
+        .map((item) => Number(item.trim()))
+        .filter((item) => Number.isFinite(item))
+    : undefined
 
-  return JSON.parse(new TextDecoder().decode(bytes)) as PosterUrlPayload
+  return {
+    date: readField('date'),
+    provider: readField('provider'),
+    handle: readField('handle'),
+    source: readField('source'),
+    inputTokens: readNumber(readField('inputTokens')),
+    outputTokens: readNumber(readField('outputTokens')),
+    cachedTokens: readNumber(readField('cachedTokens')),
+    totalTokens: readNumber(readField('totalTokens')),
+    whPerThousand: readNumber(readField('whPerThousand')),
+    ...(history?.length ? { history } : {}),
+  }
 }
+
+function decodePosterPayload(value: string): PosterUrlPayload {
+  // 终端里换行的 URL 复制后常带空白符，先全部剥掉
+  const compact = value.replace(/\s+/g, '')
+
+  let text: string
+
+  if (compact.startsWith('{') || compact.startsWith('%7B')) {
+    text = decodeURIComponent(compact)
+  } else {
+    const normalized = compact.replace(/-/g, '+').replace(/_/g, '/')
+    const padding =
+      normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4))
+    const binary = window.atob(normalized + padding)
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+    text = new TextDecoder().decode(bytes)
+  }
+
+  try {
+    return JSON.parse(text) as PosterUrlPayload
+  } catch {
+    return salvagePosterPayload(text)
+  }
+}
+
+let posterLinkBroken = false
 
 function readPosterUrlState(): ReportState | null {
   if (typeof window === 'undefined') {
@@ -450,6 +494,7 @@ function readPosterUrlState(): ReportState | null {
   const totalSource = explicitTotal ?? (hasTokenBreakdown ? legacyTotal : undefined)
 
   if (totalSource === undefined) {
+    posterLinkBroken = Boolean(data)
     return null
   }
 
@@ -651,6 +696,13 @@ function App() {
     const timer = window.setTimeout(() => setNotice(''), 1800)
     return () => window.clearTimeout(timer)
   }, [notice])
+
+  useEffect(() => {
+    if (!posterLinkBroken) return
+
+    posterLinkBroken = false
+    setNotice('分享链接的数据不完整，请重新生成或手动输入')
+  }, [])
 
   const generatePoster = (
     event?: FormEvent<HTMLFormElement | HTMLButtonElement>,
