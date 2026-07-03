@@ -10,22 +10,21 @@ from demo, default, or estimated numbers — exact evidence or `usage_unavailabl
 
 ## Step 1 — Collect today's exact usage (try in order, stop at first success)
 
-0. **One-shot CLI (preferred)**: run `npx -y aitokenweight@latest --json --no-open`.
-   On success it prints `{"status":"rendered",...}` whose `posterPath` already
-   is the filled poster URL — report it to the user and stop (pass
-   `--handle <name>` to set the poster name). If it errors or prints
-   `usage_unavailable`, fall through to the methods below.
-1. **Claude Code / local transcripts**: run `npx -y ccusage@latest daily --json`.
-   Take the entry whose `period` is today (user's timezone, default Asia/Shanghai)
-   and `agent` is `all`. Map: `inputTokens`, `outputTokens`,
+1. **Universal — own runtime usage (any agent)**: read the cumulative token
+   usage your runtime exposes (usage object, telemetry, context counter).
+   Whole day → `scope: "day"`; this conversation only → `scope: "session"`
+   plus tell the user the poster covers this session only. Either way
+   `source: "agent_runtime"`. Exception: with shell access prefer method 2 —
+   it yields the richer full-day poster.
+2. **Shell-capable environments (richer daily poster)**: run
+   `npx -y aitokenweight@latest --json --no-open` — its `posterPath` already
+   is the filled poster URL; report it and stop (`--handle <name>` sets the
+   poster name). Or read transcripts via `npx -y ccusage@latest daily --json`:
+   today's `agent: "all"` entry, map `inputTokens`, `outputTokens`,
    `cachedTokens = cacheReadTokens + cacheCreationTokens`, `totalTokens`,
    `history = last ≤7 days of totalTokens`, `source: "local_log"`.
-2. **Provider usage API**: if the user has provided an admin/usage API key, query
+3. **Provider usage API**: if the user has provided an admin/usage API key, query
    the provider usage endpoint scoped to today, `source: "provider_api"`.
-3. **Current-session fallback**: if daily data is unreachable (remote/sandboxed
-   runtime), use this session's cumulative usage instead with
-   `scope: "session"`, `source: "agent_runtime"`, and tell the user the poster
-   covers this session only, not the whole day.
 4. **Ask the user**: exact numbers only, `source: "manual"`.
 
 Before reading provider APIs or local logs, confirm the user authorizes

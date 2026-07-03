@@ -4,13 +4,13 @@
 
 ## 快速开始（三选一）
 
-**① 把链接直接发给你的 AI**——页面里埋了给 agent 的完整指令，Claude Code / Codex 等收到后会自动查询你的 token 消耗并回你一张填好的海报链接：
+**① 把链接发给你的 AI**——页面里埋了给 agent 的完整指令（优先读取 agent 自身运行时的 token 用量，任何 agent 都能走通），收到后它会回你一张填好的海报链接：
 
 ```text
-https://susyimes.github.io/aitokenweight/
+https://susyimes.github.io/aitokenweight/ 按页面里给 AI 的说明执行
 ```
 
-（若对方 agent 只是总结了网页，补一句「按网页里的说明执行」即可。）
+（若对方 agent 仍在反问，回一句「生成海报」即可。）
 
 **② 一条命令直接生成**（读取本地 Claude Code 记录，无需 agent）：
 

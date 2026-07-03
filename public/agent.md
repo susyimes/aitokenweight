@@ -27,29 +27,30 @@ between.
 browser, do not clone this repository, and do not generate a PNG — unless the
 user explicitly asks for an image file. The link renders the poster by itself.
 
-## Step 1 — Collect today's exact usage (try in order, stop at first success)
+## Step 1 — Collect exact usage (try in order, stop at first success)
 
-0. **One-shot CLI (preferred)**: run `npx -y aitokenweight@latest --json --no-open`.
-   On success it prints `{"status":"rendered",...}` whose `posterPath` already
-   is the filled poster URL — skip straight to Step 4 and give it to the user
-   (pass `--handle <name>` to set the poster name). If the command errors or
-   prints `usage_unavailable`, fall through to the methods below.
-1. **Claude Code / local transcripts**: run `npx -y ccusage@latest daily --json`.
-   Take the entry where `period` is today (user's timezone, default
-   Asia/Shanghai) and `agent` is `all`. Map fields: `inputTokens`,
-   `outputTokens`, `cachedTokens = cacheReadTokens + cacheCreationTokens`,
-   `totalTokens`, `history = last ≤7 days of totalTokens`,
-   `source: "local_log"`.
-2. **Provider usage API**: if the user has given you a usage/admin API key,
+1. **Universal — your own runtime usage (works for every agent)**: read the
+   cumulative token usage your runtime already exposes — a usage object,
+   telemetry, context-window counter, or final usage line. If it covers the
+   whole day, use `scope: "day"`; if it only covers THIS
+   conversation/session, use `scope: "session"` (the page will title the
+   poster 本次会话消耗) and tell the user plainly:
+   “拿不到全天数据，这张海报统计的是当前会话的消耗。”
+   Either way `source: "agent_runtime"`. Exception: if you can also run shell
+   commands, prefer method 2 below first — it yields the richer full-day
+   poster with history.
+2. **Shell-capable environments (richer daily poster)**: if you can run
+   commands (e.g. Claude Code), `npx -y aitokenweight@latest --json --no-open`
+   prints `{"status":"rendered",...}` whose `posterPath` already is the
+   finished poster URL with daily totals and 7-day history — skip straight to
+   Step 4 (pass `--handle <name>` to set the poster name). Or read transcripts
+   yourself: `npx -y ccusage@latest daily --json`, take today's `agent: "all"`
+   entry, map `inputTokens`, `outputTokens`,
+   `cachedTokens = cacheReadTokens + cacheCreationTokens`, `totalTokens`,
+   `history = last ≤7 days of totalTokens`, `source: "local_log"`.
+3. **Provider usage API**: if the user has given you a usage/admin API key,
    query the provider's usage endpoint scoped to today,
    `source: "provider_api"`.
-3. **Current-session fallback (remote/cloud/sandboxed agents)**: if you cannot
-   reach local transcripts or a usage API, do NOT give up — use your runtime's
-   cumulative token usage for THIS conversation/session (usage object,
-   telemetry, context-window counter, final usage line). Set
-   `scope: "session"` and `source: "agent_runtime"`. The page will then title
-   the poster 本次会话消耗 instead of 今日TOKEN消耗. When you reply, tell the
-   user plainly: “拿不到全天数据，这张海报统计的是当前会话的消耗。”
 4. **Ask the user** for exact numbers, `source: "manual"`.
 
 Reading provider APIs or local logs may expose account activity — if the user's
