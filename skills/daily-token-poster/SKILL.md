@@ -14,9 +14,13 @@ from demo, default, or estimated numbers — exact evidence or `usage_unavailabl
    usage your runtime exposes (usage object, telemetry, context counter).
    Whole day → `scope: "day"`; this conversation only → `scope: "session"`
    plus tell the user the poster covers this session only. Either way
-   `source: "agent_runtime"`. Exception: with shell access prefer method 2 —
+   `source: "agent_runtime"`. No counter at all? Derive an estimate from the
+   visible conversation (≈1.5 tokens per CJK char, ≈1.3 per English word),
+   `source: "derived"`, disclose it as an estimate — don't give up.
+   Exception: on the user's own machine with shell access prefer method 2 —
    it yields the richer full-day poster.
-2. **Shell-capable environments (richer daily poster)**: run
+2. **On the user's machine with a shell (richer daily poster)**: cloud
+   sandboxes have no user transcripts — skip shell commands there. Run
    `npx -y aitokenweight@latest --json --no-open` — its `posterPath` already
    is the filled poster URL; report it and stop (`--handle <name>` sets the
    poster name). Or read transcripts via `npx -y ccusage@latest daily --json`:

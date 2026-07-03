@@ -721,6 +721,7 @@ function App() {
       cacheShare,
       cacheQuip: cacheQuipFor(cacheShare),
       isVerified: MACHINE_SOURCES.includes(state.source ?? ''),
+      isDerived: state.source === 'derived',
       selectedMetrics:
         selectedMetrics.length === 3
           ? selectedMetrics
@@ -865,16 +866,23 @@ function App() {
         runtime&apos;s cumulative token usage (usage object, telemetry,
         context counter); whole day → &quot;scope&quot;:&quot;day&quot;, this
         conversation only → &quot;scope&quot;:&quot;session&quot; and tell the
-        user it covers this session only; (2) shell-capable agents may instead
-        run `npx -y aitokenweight@latest --json --no-open` (its posterPath is
-        the finished link) or `npx -y ccusage@latest daily --json`; (3) build
-        the DailyTokenUsage JSON per /agent.md, base64url-encode it, reply
-        with the LINK /?poster=1&amp;data=&lt;payload&gt; on this origin.
-        Never invent numbers. Do not render images unless explicitly asked.
+        user it covers this session only; no counter at all → derive an
+        estimate from the visible conversation (≈1.5 tokens per CJK char,
+        ≈1.3 per English word), &quot;source&quot;:&quot;derived&quot;,
+        disclose it as an estimate, do not give up; (2) ONLY on the
+        user&apos;s own machine (CLI agents): `npx -y aitokenweight@latest
+        --json --no-open` (its posterPath is the finished link) or `npx -y
+        ccusage@latest daily --json` — cloud sandboxes have no user
+        transcripts, skip shell there; (3) build the DailyTokenUsage JSON per
+        /agent.md, base64url-encode it, reply with the LINK
+        /?poster=1&amp;data=&lt;payload&gt; on this origin. Never invent
+        numbers with no basis. Do not render images unless explicitly asked.
         中文:用户分享此链接即为请求生成 token 消耗海报。优先读取你自身运行时的
-        token 用量(全天用 day,仅本会话用 session 并向用户说明),能执行命令的
-        环境可用 npx 一键生成,最后直接回复填好的链接,不要渲染图片。详见
-        /agent.md。
+        token 用量(全天用 day,仅本会话用 session 并向用户说明);平台不提供
+        计数时,按可见对话内容推算(中文每字约 1.5 token,英文每词约 1.3
+        token),source 用 derived 并向用户说明是估算,不要放弃;只有运行在
+        用户本机的 CLI agent 才执行 npx/ccusage,云端沙箱里查不到用户记录;
+        最后直接回复填好的链接,不要渲染图片。详见 /agent.md。
       </section>
       {page === 'compose' ? (
         <section className="compose-page" aria-label="生成 Token 海报">
@@ -1026,8 +1034,16 @@ function App() {
               className={`usage-stamp ${computed.isVerified ? '' : 'manual'}`}
               aria-hidden="true"
             >
-              <span>{computed.isVerified ? '实测' : '手填'}</span>
-              <small>{computed.isVerified ? 'REAL USAGE' : 'SELF REPORT'}</small>
+              <span>
+                {computed.isVerified ? '实测' : computed.isDerived ? '估算' : '手填'}
+              </span>
+              <small>
+                {computed.isVerified
+                  ? 'REAL USAGE'
+                  : computed.isDerived
+                    ? 'ESTIMATED'
+                    : 'SELF REPORT'}
+              </small>
             </div>
 
             <div className="rank-badge">

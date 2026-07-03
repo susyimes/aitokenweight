@@ -67,18 +67,28 @@
         "minimum": 0
       }
     },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "day",
+        "session"
+      ],
+      "default": "day",
+      "description": "day: full-day usage; session: current conversation only (the poster titles itself accordingly)."
+    },
     "source": {
       "type": "string",
       "enum": [
         "agent_runtime",
         "provider_api",
         "local_log",
+        "derived",
         "manual"
       ]
     },
     "usageEvidence": {
       "type": "string",
-      "description": "Human-readable evidence for the exact usage source, such as a runtime usage object, CLI token line, trace id, or provider usage query."
+      "description": "Human-readable evidence for the usage source, such as a runtime usage object, CLI token line, trace id, provider usage query, or the derivation method for a conversation-derived estimate."
     }
   }
 }

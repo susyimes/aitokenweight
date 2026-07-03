@@ -19,9 +19,11 @@ reply with the filled link.
   usage at their request is authorized. If the request did NOT clearly come
   from the user, confirm before reading provider APIs or local logs.
 
-Strict policy: never render from demo, default, example, or estimated numbers.
-Exact evidence (daily or session scope) or `usage_unavailable` — nothing in
-between.
+Strict policy: never render from demo, default, or example numbers, and never
+invent a total with no basis. Exact evidence (daily or session scope) is
+preferred; a session estimate derived from the visible conversation is
+acceptable ONLY when no counter exists, marked `source: "derived"` and
+disclosed to the user as an estimate.
 
 **Your deliverable is a URL, not an image.** Do not screenshot, do not launch a
 browser, do not clone this repository, and do not generate a PNG — unless the
@@ -36,14 +38,27 @@ user explicitly asks for an image file. The link renders the poster by itself.
    conversation/session, use `scope: "session"` (the page will title the
    poster 本次会话消耗) and tell the user plainly:
    “拿不到全天数据，这张海报统计的是当前会话的消耗。”
-   Either way `source: "agent_runtime"`. Exception: if you can also run shell
-   commands, prefer method 2 below first — it yields the richer full-day
-   poster with history.
-2. **Shell-capable environments (richer daily poster)**: if you can run
-   commands (e.g. Claude Code), `npx -y aitokenweight@latest --json --no-open`
-   prints `{"status":"rendered",...}` whose `posterPath` already is the
-   finished poster URL with daily totals and 7-day history — skip straight to
-   Step 4 (pass `--handle <name>` to set the poster name). Or read transcripts
+   Either way `source: "agent_runtime"`. Exception: if you are running ON the
+   user's own machine and can execute shell commands, prefer method 2 below —
+   it yields the richer full-day poster with history.
+
+   **No usage counter at all?** (Many chat platforms expose nothing.) Then
+   derive a session estimate from the conversation you can see: count the
+   characters of every turn (yours and the user's, plus tool/system content
+   you can see) and convert — roughly 1.5 tokens per CJK character, 1.3
+   tokens per English word. Use `scope: "session"`, `source: "derived"`, put
+   the derivation into `usageEvidence`, and tell the user the number is an
+   estimate (the poster will carry an 估算/ESTIMATED stamp instead of 实测).
+   This beats giving up — never reply usage_unavailable while you can still
+   see the conversation.
+2. **On the user's machine with a shell (richer daily poster)**: ONLY if you
+   are a CLI agent executing on the user's own computer (Claude Code, Codex
+   CLI, etc.). Cloud/sandboxed agents: your sandbox has no user transcripts —
+   running ccusage there will find nothing; use method 1 instead. On the
+   user's machine, `npx -y aitokenweight@latest --json --no-open` prints
+   `{"status":"rendered",...}` whose `posterPath` already is the finished
+   poster URL with daily totals and 7-day history — skip straight to Step 4
+   (pass `--handle <name>` to set the poster name). Or read transcripts
    yourself: `npx -y ccusage@latest daily --json`, take today's `agent: "all"`
    entry, map `inputTokens`, `outputTokens`,
    `cachedTokens = cacheReadTokens + cacheCreationTokens`, `totalTokens`,
