@@ -924,36 +924,6 @@ function App() {
               />
             </label>
 
-            <details className="calc-details">
-              <summary>估算口径</summary>
-              <div className="calc-body">
-                <p>
-                  默认按 {DEFAULT_WH_PER_THOUSAND.toFixed(2)} Wh / 1K tokens
-                  换算，用来生成社交表达，不作为能耗审计。
-                </p>
-                <label>
-                  <span>Wh / 1K tokens</span>
-                  <input
-                    min="0.01"
-                    max="10"
-                    step="0.01"
-                    type="number"
-                    value={state.whPerThousand}
-                    onChange={(event) =>
-                      setState((current) => ({
-                        ...current,
-                        whPerThousand: clampNumber(
-                          Number(event.target.value),
-                          0.01,
-                          10,
-                        ),
-                      }))
-                    }
-                  />
-                </label>
-              </div>
-            </details>
-
             <div className="compose-actions">
               <button
                 type="button"
@@ -1090,11 +1060,11 @@ function App() {
                 <div className="token-ledger" aria-label="Token 摘要">
                   <div className="ledger-item plain">
                     <span>计量口径</span>
-                    <strong>今日总量</strong>
+                    <strong>{computed.isSession ? '本次会话' : '今日总量'}</strong>
                   </div>
                   <div className="ledger-item plain">
-                    <span>估算基准</span>
-                    <strong>{state.whPerThousand.toFixed(2)} Wh / 1K</strong>
+                    <span>等效电量</span>
+                    <strong>{computed.kwh.toFixed(1)} 度</strong>
                   </div>
                   <div className="ledger-item plain">
                     <span>结果表达</span>
@@ -1200,9 +1170,7 @@ function App() {
                   aitoken<span>weight</span>
                 </span>
               </div>
-              <p>
-                电量按约 {state.whPerThousand.toFixed(2)} Wh / 1K tokens 估算，仅供娱乐
-              </p>
+              <p>等效电量为趣味换算，仅供娱乐</p>
               <strong>susyimes</strong>
             </footer>
           </div>
