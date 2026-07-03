@@ -37,6 +37,10 @@ type ReportState = {
   whPerThousand: number
   history: number[]
   metricIds: string[]
+  inputTokens?: number
+  outputTokens?: number
+  cachedTokens?: number
+  source?: string
 }
 
 type PosterUrlPayload = Partial<ReportState> & {
@@ -189,11 +193,65 @@ const energyMetricPool: EnergyMetric[] = [
   },
 ]
 
-const trendLabels = ['一', '二', '三', '四', '五', '六', '日']
+const weekdayGlyphs = ['日', '一', '二', '三', '四', '五', '六']
 const formatNumber = new Intl.NumberFormat('en-US')
 const formatCompact = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
+
+// 《红楼梦》全本约 73 万字，按中文约 1.5 token/字折算
+const TOKENS_PER_HONGLOUMENG = 1_100_000
+
+const MACHINE_SOURCES = ['agent_runtime', 'local_log', 'provider_api']
+
+const breakdownPalette = [
+  { key: 'input', label: '输入', color: '#35599c' },
+  { key: 'output', label: '输出', color: '#c2542a' },
+  { key: 'cache', label: '缓存', color: '#1c855a' },
+] as const
+
+function compactTokens(value: number) {
+  if (value >= 1_000_000) return `${formatCompact.format(value / 1_000_000)}M`
+  if (value >= 1_000) return `${formatCompact.format(value / 1_000)}K`
+  return formatNumber.format(value)
+}
+
+function quipFor(total: number) {
+  if (total < 100_000) return '浅尝辄止，今日碳中和标兵'
+  if (total < 1_000_000) return '理性用电，可持续燃烧'
+  if (total < 5_000_000) return '火力渐开，键盘已经发烫'
+  if (total < 15_000_000) return '重度玩家，GPU 为你轰鸣'
+  if (total < 50_000_000) return '烧穿上下文，机房为你降温'
+  return 'Token 黑洞，建议直接入股电厂'
+}
+
+function cacheQuipFor(share: number) {
+  if (share >= 70) return '缓存大师，省下的都是电'
+  if (share >= 40) return '缓存给力，复用有道'
+  return '缓存偏低，上下文天天见新'
+}
+
+function readingEquivalent(total: number) {
+  const books = total / TOKENS_PER_HONGLOUMENG
+
+  if (books >= 1) {
+    return `读完 ${formatMetricValue(books)} 本《红楼梦》`
+  }
+
+  return `${formatMetricValue(total / 1.5 / 10_000)} 万字阅读量`
+}
+
+function trendDayLabels(reportDate: string) {
+  const anchor = new Date(`${reportDate}T00:00:00`)
+  const base = Number.isNaN(anchor.getTime()) ? new Date() : anchor
+
+  return Array.from({ length: 7 }, (_, index) => {
+    if (index === 6) return '今'
+
+    const day = new Date(base.getTime() - (6 - index) * 86_400_000)
+    return weekdayGlyphs[day.getDay()]
+  })
+}
 
 const rankProfiles: RankProfile[] = [
   { minTokens: 0, level: 1, title: 'Token 火花' },
@@ -401,9 +459,12 @@ function readPosterUrlState(): ReportState | null {
   const metricIds = payload.metricIds?.filter((id) =>
     energyMetricPool.some((metric) => metric.id === id),
   )
+  const rawHistory = payload.history
+    ?.map((value) => Math.round(clampNumber(value)))
+    .slice(-7)
   const history =
-    payload.history?.length === 7
-      ? payload.history.map((value) => Math.round(clampNumber(value)))
+    rawHistory && rawHistory.length > 0
+      ? [...Array<number>(7 - rawHistory.length).fill(0), ...rawHistory]
       : seedHistory(totalTokens)
 
   return {
@@ -422,6 +483,10 @@ function readPosterUrlState(): ReportState | null {
     ),
     history,
     metricIds: metricIds?.length === 3 ? metricIds : ['phone', 'ev', 'kettle'],
+    ...(inputTokens !== undefined ? { inputTokens } : {}),
+    ...(outputTokens !== undefined ? { outputTokens } : {}),
+    ...(cachedTokens !== undefined ? { cachedTokens } : {}),
+    ...(typeof payload.source === 'string' ? { source: payload.source } : {}),
   }
 }
 
@@ -518,6 +583,25 @@ function App() {
       .map((id) => energyMetricPool.find((metric) => metric.id === id))
       .filter((metric): metric is EnergyMetric => Boolean(metric))
 
+    const breakdownValues = [
+      state.inputTokens ?? 0,
+      state.outputTokens ?? 0,
+      state.cachedTokens ?? 0,
+    ]
+    const breakdownTotal = breakdownValues.reduce((sum, value) => sum + value, 0)
+    const breakdown =
+      breakdownTotal > 0
+        ? breakdownPalette.map((series, index) => ({
+            ...series,
+            value: breakdownValues[index],
+            share: (breakdownValues[index] / breakdownTotal) * 100,
+          }))
+        : null
+    const cacheShare = breakdown ? breakdown[2].share : 0
+
+    const maxTrend = Math.max(...trend, 1)
+    const peakIndex = trend.indexOf(Math.max(...trend))
+
     return {
       totalTokens,
       displayMillions: totalTokens / 1_000_000,
@@ -525,14 +609,35 @@ function App() {
       percentile,
       progress: Math.min(100, Math.max(8, percentile)),
       trend,
-      maxTrend: Math.max(...trend, 1),
+      maxTrend,
+      peakIndex,
+      barHeights: trend.map(
+        (value) => 12 + Math.sqrt(value / maxTrend) * 74,
+      ),
+      dayLabels: trendDayLabels(state.reportDate),
       rank,
+      quip: quipFor(totalTokens),
+      reading: readingEquivalent(totalTokens),
+      breakdown,
+      cacheShare,
+      cacheQuip: cacheQuipFor(cacheShare),
+      isVerified: MACHINE_SOURCES.includes(state.source ?? ''),
       selectedMetrics:
         selectedMetrics.length === 3
           ? selectedMetrics
           : energyMetricPool.slice(0, 3),
     }
-  }, [state.history, state.metricIds, state.totalTokens, state.whPerThousand])
+  }, [
+    state.cachedTokens,
+    state.history,
+    state.inputTokens,
+    state.metricIds,
+    state.outputTokens,
+    state.reportDate,
+    state.source,
+    state.totalTokens,
+    state.whPerThousand,
+  ])
 
   useEffect(() => {
     if (isUrlDriven) return
@@ -561,6 +666,10 @@ function App() {
         totalTokens,
         history: [...current.history.slice(-6), totalTokens],
         metricIds: randomMetricIds(),
+        inputTokens: undefined,
+        outputTokens: undefined,
+        cachedTokens: undefined,
+        source: 'manual',
       }
     })
     setPage('poster')
@@ -818,6 +927,14 @@ function App() {
               </div>
             </header>
 
+            <div
+              className={`usage-stamp ${computed.isVerified ? '' : 'manual'}`}
+              aria-hidden="true"
+            >
+              <span>{computed.isVerified ? '实测' : '手填'}</span>
+              <small>{computed.isVerified ? 'REAL USAGE' : 'SELF REPORT'}</small>
+            </div>
+
             <div className="rank-badge">
               <Crown aria-hidden="true" />
               <div>
@@ -840,6 +957,7 @@ function App() {
               </div>
               <h1>{formatCompact.format(computed.displayMillions)}M</h1>
               <p>{formatNumber.format(computed.totalTokens)} tokens</p>
+              <p className="reading-line">≈ {computed.reading}的文字量</p>
               <div
                 className="progress-track"
                 aria-label={`超过 ${computed.percentile.toFixed(1)}% 的开发者`}
@@ -847,20 +965,57 @@ function App() {
                 <span style={{ width: `${computed.progress}%` }} />
               </div>
               <strong>超过 {computed.percentile.toFixed(1)}% 的开发者</strong>
-              <div className="token-ledger" aria-label="Token 摘要">
-                <div className="ledger-item input">
-                  <span>计量口径</span>
-                  <strong>今日总量</strong>
+              <p className="hero-quip">「{computed.quip}」</p>
+              {computed.breakdown ? (
+                <div className="token-ledger" aria-label="Token 构成">
+                  {computed.breakdown.map((series) => (
+                    <div className={`ledger-item ${series.key}`} key={series.key}>
+                      <span>{series.label}</span>
+                      <strong>{compactTokens(series.value)}</strong>
+                    </div>
+                  ))}
                 </div>
-                <div className="ledger-item output">
-                  <span>估算基准</span>
-                  <strong>{state.whPerThousand.toFixed(2)} Wh / 1K</strong>
+              ) : (
+                <div className="token-ledger" aria-label="Token 摘要">
+                  <div className="ledger-item plain">
+                    <span>计量口径</span>
+                    <strong>今日总量</strong>
+                  </div>
+                  <div className="ledger-item plain">
+                    <span>估算基准</span>
+                    <strong>{state.whPerThousand.toFixed(2)} Wh / 1K</strong>
+                  </div>
+                  <div className="ledger-item plain">
+                    <span>结果表达</span>
+                    <strong>随机 3 项</strong>
+                  </div>
                 </div>
-                <div className="ledger-item cache">
-                  <span>结果表达</span>
-                  <strong>随机 3 项</strong>
+              )}
+
+              {computed.breakdown && (
+                <div className="breakdown-block" aria-label="消耗结构">
+                  <div className="breakdown-bar">
+                    {computed.breakdown.map((series) => (
+                      <span
+                        key={series.key}
+                        style={{
+                          width: `${series.share}%`,
+                          background: series.color,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div className="breakdown-legend">
+                    {computed.breakdown.map((series) => (
+                      <span className="legend-item" key={series.key}>
+                        <i style={{ background: series.color }} />
+                        {series.label} {series.share.toFixed(0)}%
+                      </span>
+                    ))}
+                  </div>
+                  <p className="breakdown-quip">{computed.cacheQuip}</p>
                 </div>
-              </div>
+              )}
             </section>
 
             <section className="energy-block">
@@ -911,17 +1066,15 @@ function App() {
                 </div>
                 <div className="bars">
                   {computed.trend.map((value, index) => (
-                    <div className="bar-item" key={`${trendLabels[index]}-${index}`}>
+                    <div className="bar-item" key={`trend-${index}`}>
+                      {(index === computed.peakIndex || index === 6) && (
+                        <em>{compactTokens(value)}</em>
+                      )}
                       <span
                         className={index === 6 ? 'active' : ''}
-                        style={{
-                          height: `${Math.max(
-                            18,
-                            (value / computed.maxTrend) * 86,
-                          )}px`,
-                        }}
+                        style={{ height: `${computed.barHeights[index]}px` }}
                       />
-                      <small>{trendLabels[index]}</small>
+                      <small>{computed.dayLabels[index]}</small>
                     </div>
                   ))}
                 </div>

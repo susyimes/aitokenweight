@@ -552,15 +552,19 @@
 }
 
 .ledger-item.input {
-  border-top: 4px solid #3aa9ff;
+  border-top: 4px solid #35599c;
 }
 
 .ledger-item.output {
-  border-top: 4px solid #5ed7b7;
+  border-top: 4px solid #c2542a;
 }
 
 .ledger-item.cache {
-  border-top: 4px solid #f3c75b;
+  border-top: 4px solid #1c855a;
+}
+
+.ledger-item.plain {
+  border-top: 4px solid rgba(22, 24, 23, 0.24);
 }
 
 .energy-block {
@@ -759,7 +763,7 @@
 .weekly-title svg {
   width: 18px;
   height: 18px;
-  color: #5ed7b7;
+  color: #f3c75b;
 }
 
 .bars {
@@ -780,12 +784,20 @@
 .bar-item span {
   width: 24px;
   border-radius: 5px 5px 0 0;
-  background: #5ed7b7;
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .bar-item span.active {
-  background: #3aa9ff;
-  box-shadow: 0 0 0 3px rgba(58, 169, 255, 0.16);
+  background: #f3c75b;
+  box-shadow: 0 0 0 3px rgba(243, 199, 91, 0.22);
+}
+
+.bar-item em {
+  color: #fffdf7;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .bar-item small {
@@ -1102,5 +1114,112 @@
 
   .agent-cta-actions button {
     flex: 1 1 100%;
+  }
+}
+
+.usage-stamp {
+  position: absolute;
+  top: 118px;
+  right: 40px;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 9px 13px;
+  color: #c2542a;
+  border: 3px double #c2542a;
+  border-radius: 10px;
+  transform: rotate(9deg);
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.usage-stamp span {
+  font-size: 1.02rem;
+  font-weight: 900;
+  letter-spacing: 7px;
+  margin-right: -7px;
+}
+
+.usage-stamp small {
+  font-size: 0.56rem;
+  font-weight: 850;
+  letter-spacing: 2px;
+}
+
+.usage-stamp.manual {
+  color: #62665f;
+  border-color: #62665f;
+}
+
+.reading-line {
+  margin: 2px 0 0;
+  color: #62665f;
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.hero-quip {
+  margin: 10px 0 0;
+  color: #161817;
+  font-size: 0.96rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.breakdown-block {
+  width: min(570px, 100%);
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.breakdown-bar {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.breakdown-bar span {
+  min-width: 3px;
+}
+
+.breakdown-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  color: #4f554d;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.breakdown-quip {
+  margin: 0;
+  color: #62665f;
+  font-size: 0.78rem;
+  font-weight: 760;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .usage-stamp {
+    top: 96px;
+    right: 16px;
+    transform: rotate(9deg) scale(0.82);
   }
 }
