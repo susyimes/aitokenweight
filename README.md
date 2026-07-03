@@ -4,13 +4,13 @@
 
 ## 快速开始（三选一）
 
-**① 把链接发给你的 AI**——页面里埋了给 agent 的完整指令（优先读取 agent 自身运行时的 token 用量，任何 agent 都能走通），收到后它会回你一张填好的海报链接：
+**① 把这段话发给你的 AI**——指令自带降级方案，任何 agent 都能走通，收到后它会回你一张填好的海报链接：
 
 ```text
-https://susyimes.github.io/aitokenweight/ 按页面里给 AI 的说明执行
+读取 https://susyimes.github.io/aitokenweight/agent.md 并按其执行，帮我生成今日 token 消耗海报；优先用你运行时能看到的 token 用量，拿不到全天数据就用当前会话消耗（scope 设为 session）并向我说明；最后直接回复填好的海报链接，不要生成图片。
 ```
 
-（若对方 agent 仍在反问，回一句「生成海报」即可。）
+（网页首页也有一键复制这段指令的卡片；只发裸链接 `https://susyimes.github.io/aitokenweight/` 也可以，页面里埋了同样的指令，但部分 agent 会先反问一句。）
 
 **② 一条命令直接生成**（读取本地 Claude Code 记录，无需 agent）：
 

@@ -634,8 +634,8 @@ function App() {
   const reportRef = useRef<HTMLDivElement>(null)
   const isUrlDriven = initialAppState.source === 'url'
   const agentPrompt = useMemo(() => {
-    const siteUrl = new URL('.', window.location.href).href
-    return `${siteUrl} 按页面里给 AI 的说明执行`
+    const agentMdUrl = new URL('agent.md', window.location.href).href
+    return `读取 ${agentMdUrl} 并按其执行，帮我生成今日 token 消耗海报；优先用你运行时能看到的 token 用量，拿不到全天数据就用当前会话消耗（scope 设为 session）并向我说明；最后直接回复填好的海报链接，不要生成图片。`
   }, [])
 
   const computed = useMemo(() => {
@@ -783,7 +783,7 @@ function App() {
 
   const copyAgentPrompt = async () => {
     const copied = await writeClipboard(agentPrompt)
-    setNotice(copied ? '链接已复制，直接发给你的 AI 即可' : '复制被浏览器拦截')
+    setNotice(copied ? '指令已复制，发给你的 AI 即可' : '复制被浏览器拦截')
   }
 
   const startOwnPoster = () => {
@@ -978,12 +978,10 @@ function App() {
             <div className="agent-card-head">
               <Bot aria-hidden="true" />
               <div>
-                <strong>懒得查？把链接丢给你的 AI</strong>
+                <strong>懒得查？把这段话丢给你的 AI</strong>
                 <span>
-                  复制发给 Claude Code / Codex 等任意 agent——页面里埋了给 AI
-                  的完整指令，它会自动查询你的 token
-                  消耗并回你一张填好的海报链接。若对方仍在反问，回一句
-                  「生成海报」即可。
+                  复制发给 Claude Code / Codex 等任意 agent，指令自带降级方案，
+                  它会自动查询你的 token 消耗并回你一张填好的海报链接。
                 </span>
               </div>
             </div>
@@ -1222,7 +1220,7 @@ function App() {
               </button>
               <button type="button" onClick={copyAgentPrompt}>
                 <Bot aria-hidden="true" />
-                复制 AI 链接
+                复制 AI 指令
               </button>
             </div>
           </aside>
