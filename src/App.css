@@ -1269,6 +1269,16 @@
   letter-spacing: 3px;
 }
 
+.trend-panel.solo {
+  grid-template-columns: 1fr;
+}
+
+.trend-panel.solo .streak {
+  grid-template-columns: auto auto;
+  justify-content: center;
+  border-right: none;
+}
+
 @media (max-width: 720px) {
   .usage-stamp {
     top: 96px;

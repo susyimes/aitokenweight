@@ -210,6 +210,9 @@ const TOKENS_PER_HONGLOUMENG = 1_100_000
 
 const MACHINE_SOURCES = ['agent_runtime', 'local_log', 'provider_api']
 
+// 历史趋势暂时隐藏；payload 里仍收集 history，随时可以打开
+const SHOW_WEEKLY_TREND = false as boolean
+
 const breakdownPalette = [
   { key: 'input', label: '输入', color: '#35599c' },
   { key: 'output', label: '输出', color: '#c2542a' },
@@ -1134,13 +1137,16 @@ function App() {
               })}
             </section>
 
-            <section className="trend-panel">
+            <section
+              className={`trend-panel ${SHOW_WEEKLY_TREND ? '' : 'solo'}`}
+            >
               <div className="streak">
                 <Flame aria-hidden="true" />
                 <span>{computed.isSession ? '本次火力' : '今日火力'}</span>
                 <strong>LV.{computed.rank.level}</strong>
                 <small className="streak-realm">{computed.rank.title}</small>
               </div>
+              {SHOW_WEEKLY_TREND && (
               <div className="weekly">
                 <div className="weekly-title">
                   <BarChart3 aria-hidden="true" />
@@ -1161,6 +1167,7 @@ function App() {
                   ))}
                 </div>
               </div>
+              )}
             </section>
 
             <footer className="poster-footer">
