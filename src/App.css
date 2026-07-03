@@ -828,6 +828,27 @@
   text-align: right;
 }
 
+.poster-qr {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.poster-qr img {
+  width: 72px;
+  height: 72px;
+  background: #fffdf7;
+  border: 1px solid rgba(22, 24, 23, 0.14);
+  border-radius: 6px;
+}
+
+.poster-qr span {
+  color: #62665f;
+  font-size: 0.6rem;
+  font-weight: 850;
+  letter-spacing: 1px;
+}
+
 .poster-brand.mini {
   font-size: 1.08rem;
 }
@@ -912,10 +933,30 @@
     font-size: 4.18rem;
   }
 
-  .token-ledger,
-  .metric-grid,
   .trend-panel {
     grid-template-columns: 1fr;
+  }
+
+  .token-ledger {
+    gap: 6px;
+    margin-top: 20px;
+  }
+
+  .ledger-item {
+    gap: 3px;
+    padding: 8px 8px 7px;
+  }
+
+  .ledger-item span {
+    font-size: 0.68rem;
+  }
+
+  .ledger-item strong {
+    font-size: 0.82rem;
+  }
+
+  .metric-grid {
+    gap: 8px;
   }
 
   .energy-value {
@@ -931,7 +972,31 @@
   }
 
   .metric-card {
-    min-height: 124px;
+    min-height: 96px;
+    padding: 12px 4px;
+  }
+
+  .metric-icon {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 5px;
+  }
+
+  .metric-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .metric-card strong {
+    font-size: 1.72rem;
+  }
+
+  .metric-unit {
+    font-size: 0.76rem;
+  }
+
+  .metric-card p {
+    font-size: 0.72rem;
   }
 
   .streak {
@@ -1139,10 +1204,11 @@
   gap: 1px;
   padding: 9px 13px;
   color: #c2542a;
+  background: rgba(255, 253, 247, 0.92);
   border: 3px double #c2542a;
   border-radius: 10px;
   transform: rotate(9deg);
-  opacity: 0.82;
+  opacity: 0.86;
   pointer-events: none;
 }
 
@@ -1281,18 +1347,25 @@
 
 @media (max-width: 720px) {
   .usage-stamp {
-    top: 96px;
-    right: 16px;
-    transform: rotate(9deg) scale(0.82);
+    top: 88px;
+    right: 8px;
+    padding: 6px 9px;
+    transform: rotate(9deg) scale(0.78);
+  }
+
+  .usage-stamp span {
+    font-size: 0.88rem;
+    letter-spacing: 4px;
+    margin-right: -4px;
   }
 
   .rank-badge {
     flex-wrap: wrap;
     justify-content: center;
-    row-gap: 10px;
+    row-gap: 8px;
     min-width: 0;
     max-width: 100%;
-    padding: 12px 18px;
+    padding: 12px 16px 10px;
   }
 
   .rank-next {
@@ -1300,5 +1373,9 @@
     margin-left: 0;
     padding-left: 0;
     justify-items: center;
+  }
+
+  .rank-next small {
+    font-size: 0.58rem;
   }
 }

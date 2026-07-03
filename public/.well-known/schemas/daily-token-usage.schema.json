@@ -76,6 +76,11 @@
       "default": "day",
       "description": "day: full-day usage; session: current conversation only (the poster titles itself accordingly)."
     },
+    "funLine": {
+      "type": "string",
+      "maxLength": 48,
+      "description": "Optional creative one-liner equating the token volume to something vivid, rendered verbatim under the token count (e.g. ≈ 把《三体》三部曲通读 9 遍). Omit to let the page show its default equivalence."
+    },
     "source": {
       "type": "string",
       "enum": [

@@ -27,6 +27,7 @@ import {
   Zap,
 } from 'lucide-react'
 import './App.css'
+import siteQr from './assets/site-qr.png'
 
 type Page = 'compose' | 'poster'
 
@@ -42,6 +43,7 @@ type ReportState = {
   cachedTokens?: number
   source?: string
   scope?: string
+  funLine?: string
 }
 
 type PosterUrlPayload = Partial<ReportState> & {
@@ -457,6 +459,7 @@ function salvagePosterPayload(text: string): PosterUrlPayload {
     handle: readField('handle'),
     source: readField('source'),
     scope: readField('scope'),
+    funLine: readField('funLine'),
     inputTokens: readNumber(readField('inputTokens')),
     outputTokens: readNumber(readField('outputTokens')),
     cachedTokens: readNumber(readField('cachedTokens')),
@@ -579,6 +582,9 @@ function readPosterUrlState(): ReportState | null {
     ...(cachedTokens !== undefined ? { cachedTokens } : {}),
     ...(typeof payload.source === 'string' ? { source: payload.source } : {}),
     ...(scope ? { scope } : {}),
+    ...(typeof payload.funLine === 'string' && payload.funLine.trim()
+      ? { funLine: payload.funLine.trim().slice(0, 48) }
+      : {}),
   }
 }
 
@@ -716,7 +722,9 @@ function App() {
       dayLabels: trendDayLabels(state.reportDate),
       rank,
       quip: quipFor(totalTokens),
-      reading: readingEquivalent(totalTokens),
+      readingLine: state.funLine?.trim()
+        ? state.funLine.trim()
+        : `≈ ${readingEquivalent(totalTokens)}的文字量`,
       breakdown,
       cacheShare,
       cacheQuip: cacheQuipFor(cacheShare),
@@ -729,11 +737,13 @@ function App() {
     }
   }, [
     state.cachedTokens,
+    state.funLine,
     state.history,
     state.inputTokens,
     state.metricIds,
     state.outputTokens,
     state.reportDate,
+    state.scope,
     state.source,
     state.totalTokens,
     state.whPerThousand,
@@ -1074,7 +1084,7 @@ function App() {
               </div>
               <h1>{formatCompact.format(computed.displayMillions)}M</h1>
               <p>{formatNumber.format(computed.totalTokens)} tokens</p>
-              <p className="reading-line">≈ {computed.reading}的文字量</p>
+              <p className="reading-line">{computed.readingLine}</p>
               <div
                 className="progress-track"
                 aria-label={`超过 ${computed.percentile.toFixed(1)}% 的开发者`}
@@ -1211,7 +1221,10 @@ function App() {
                 </span>
               </div>
               <p>等效电量按公开行业研究折算，仅供娱乐</p>
-              <strong>susyimes</strong>
+              <div className="poster-qr">
+                <img src={siteQr} alt="扫码生成我的 Token 海报" />
+                <span>扫码生成我的</span>
+              </div>
             </footer>
           </div>
 

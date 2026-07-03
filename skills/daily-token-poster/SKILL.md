@@ -62,6 +62,10 @@ Build a `DailyTokenUsage` object (schema:
 
 Always set `usageEvidence` to the concrete evidence source you used.
 
+Optional `funLine` (≤48 chars, start with “≈ ”): one creative equivalence of
+your own for the volume (e.g. “≈ 把《三体》三部曲通读 9 遍”), rendered
+verbatim under the big number; omit for the page default.
+
 ## Step 3 — Fill the template and share
 
 Serialize with a real JSON encoder (never hand-concatenate the string), encode

@@ -94,6 +94,7 @@ and stop. Do not build a poster URL.
   "totalTokens": 0,
   "history": [0],
   "scope": "day",
+  "funLine": "≈ 读完 63 本《红楼梦》的文字量",
   "source": "local_log",
   "usageEvidence": "<the exact command, API, or log you used>"
 }
@@ -102,6 +103,12 @@ and stop. Do not build a poster URL.
 `scope` is `"day"` (default, omit if daily) or `"session"` (current-session
 fallback — the poster will say so). Omit `history` when you only know the
 session numbers.
+
+`funLine` (optional, ≤48 chars): write ONE creative equivalence of your own
+for this token volume — rendered verbatim under the big number. Be vivid and
+match the magnitude, e.g. “≈ 把《三体》三部曲通读 9 遍”,
+“≈ 让莎士比亚全集重写 4 遍”, “≈ 一口气看完 20 万条弹幕”. Start it with “≈ ”.
+Omit the field and the page falls back to its default (《红楼梦》 volumes).
 
 `totalTokens`, `date`, `timezone`, `provider`, `handle`, `source` are required.
 Full schema: [.well-known/schemas/daily-token-usage.schema.json](./.well-known/schemas/daily-token-usage.schema.json)
