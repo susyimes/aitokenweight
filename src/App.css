@@ -529,6 +529,10 @@
   margin-top: 28px;
 }
 
+.token-ledger.breakdown-ledger {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .ledger-item {
   display: grid;
   gap: 5px;
@@ -559,6 +563,11 @@
   border-top: 4px solid #c2542a;
 }
 
+.ledger-item.cache-create {
+  border-top: 4px solid #a06116;
+}
+
+.ledger-item.cache-read,
 .ledger-item.cache {
   border-top: 4px solid #1c855a;
 }
@@ -940,6 +949,10 @@
   .token-ledger {
     gap: 6px;
     margin-top: 20px;
+  }
+
+  .token-ledger.breakdown-ledger {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .ledger-item {

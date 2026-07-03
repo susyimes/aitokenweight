@@ -60,9 +60,9 @@ user explicitly asks for an image file. The link renders the poster by itself.
    poster URL with daily totals and 7-day history — skip straight to Step 4
    (pass `--handle <name>` to set the poster name). Or read transcripts
    yourself: `npx -y ccusage@latest daily --json`, take today's `agent: "all"`
-   entry, map `inputTokens`, `outputTokens`,
-   `cachedTokens = cacheReadTokens + cacheCreationTokens`, `totalTokens`,
-   `history = last ≤7 days of totalTokens`, `source: "local_log"`.
+   entry, map `inputTokens`, `outputTokens`, `cacheCreationTokens`,
+   `cacheReadTokens`, `totalTokens`, `history = last ≤7 days of totalTokens`,
+   `source: "local_log"`.
 3. **Provider usage API**: if the user has given you a usage/admin API key,
    query the provider's usage endpoint scoped to today,
    `source: "provider_api"`.
@@ -90,7 +90,8 @@ and stop. Do not build a poster URL.
   "handle": "<user's name or handle>",
   "inputTokens": 0,
   "outputTokens": 0,
-  "cachedTokens": 0,
+  "cacheCreationTokens": 0,
+  "cacheReadTokens": 0,
   "totalTokens": 0,
   "history": [0],
   "scope": "day",

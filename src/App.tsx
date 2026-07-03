@@ -40,7 +40,8 @@ type ReportState = {
   metricIds: string[]
   inputTokens?: number
   outputTokens?: number
-  cachedTokens?: number
+  cacheCreationTokens?: number
+  cacheReadTokens?: number
   source?: string
   scope?: string
   funLine?: string
@@ -48,6 +49,8 @@ type ReportState = {
 
 type PosterUrlPayload = Partial<ReportState> & {
   cachedTokens?: number
+  cacheCreationTokens?: number
+  cacheReadTokens?: number
   date?: string
   inputTokens?: number
   outputTokens?: number
@@ -87,13 +90,14 @@ const STORAGE_KEY = 'aitokenweight-state'
 const DEFAULT_TOTAL_TOKENS = 8_620_000
 const DEFAULT_WH_PER_THOUSAND = 0.4
 
-// 分项能耗模型（Wh / 1K tokens，含数据中心开销）。输出 token 需对全上下文
-// 完整前向推理成本最高；输入走并行 prefill；缓存读取近乎只有显存带宽成本。
+// 分项能耗模型（Wh / 1K tokens，含数据中心开销）。输出 token 需完整
+// 自回归推理；输入和缓存创建走 prefill；缓存读取近乎只有显存带宽成本。
 // 量级按 Google / Epoch AI 2025 公布的单次请求 0.24–0.34 Wh 校准。
 // 仅在 payload 携带输入/输出/缓存分项时启用；无分项时退回混合系数。
 const WH_PER_1K_INPUT = 0.3
 const WH_PER_1K_OUTPUT = 0.9
-const WH_PER_1K_CACHED = 0.03
+const WH_PER_1K_CACHE_CREATE = WH_PER_1K_INPUT
+const WH_PER_1K_CACHE_READ = 0.03
 
 const metricIcons = {
   phone: SmartphoneCharging,
@@ -226,7 +230,8 @@ const SHOW_WEEKLY_TREND = false as boolean
 const breakdownPalette = [
   { key: 'input', label: '输入', color: '#35599c' },
   { key: 'output', label: '输出', color: '#c2542a' },
-  { key: 'cache', label: '缓存', color: '#1c855a' },
+  { key: 'cache-create', label: '缓存创建', color: '#a06116' },
+  { key: 'cache-read', label: '缓存读取', color: '#1c855a' },
 ] as const
 
 function compactTokens(value: number) {
@@ -384,23 +389,43 @@ function readSavedState(): ReportState {
         inputTokens: number
         outputTokens: number
         cachedTokens: number
+        cacheCreationTokens: number
+        cacheReadTokens: number
         modelId: string
       }
     >
+    const cacheCreationTokens = parsed.cacheCreationTokens
+    const cacheReadTokens = parsed.cacheReadTokens ?? parsed.cachedTokens
+    const hasTokenBreakdown =
+      parsed.inputTokens !== undefined ||
+      parsed.outputTokens !== undefined ||
+      cacheCreationTokens !== undefined ||
+      cacheReadTokens !== undefined
     const legacyTotal =
       (parsed.inputTokens ?? 0) +
       (parsed.outputTokens ?? 0) +
-      (parsed.cachedTokens ?? 0)
+      (cacheCreationTokens ?? 0) +
+      (cacheReadTokens ?? 0)
     const merged: ReportState = {
       ...defaultState(),
       ...parsed,
-      totalTokens: parsed.totalTokens ?? (legacyTotal || DEFAULT_TOTAL_TOKENS),
+      totalTokens:
+        parsed.totalTokens ??
+        (hasTokenBreakdown ? legacyTotal : DEFAULT_TOTAL_TOKENS),
       whPerThousand: parsed.whPerThousand ?? DEFAULT_WH_PER_THOUSAND,
       metricIds:
         parsed.metricIds?.filter((id) =>
           energyMetricPool.some((metric) => metric.id === id),
         ) ?? randomMetricIds(),
     }
+
+    if (cacheCreationTokens !== undefined) {
+      merged.cacheCreationTokens = cacheCreationTokens
+    }
+    if (cacheReadTokens !== undefined) {
+      merged.cacheReadTokens = cacheReadTokens
+    }
+    delete (merged as ReportState & { cachedTokens?: number }).cachedTokens
 
     if (merged.handle === '@codemaster' || merged.handle === '@developer') {
       merged.handle = 'susyimes'
@@ -463,6 +488,8 @@ function salvagePosterPayload(text: string): PosterUrlPayload {
     inputTokens: readNumber(readField('inputTokens')),
     outputTokens: readNumber(readField('outputTokens')),
     cachedTokens: readNumber(readField('cachedTokens')),
+    cacheCreationTokens: readNumber(readField('cacheCreationTokens')),
+    cacheReadTokens: readNumber(readField('cacheReadTokens')),
     totalTokens: readNumber(readField('totalTokens')),
     whPerThousand: readNumber(readField('whPerThousand')),
     ...(history?.length ? { history } : {}),
@@ -525,18 +552,24 @@ function readPosterUrlState(): ReportState | null {
 
   const inputTokens = readNumber(payload.inputTokens)
   const outputTokens = readNumber(payload.outputTokens)
-  const cachedTokens = readNumber(payload.cachedTokens)
+  const legacyCachedTokens = readNumber(payload.cachedTokens)
+  const cacheCreationTokens = readNumber(payload.cacheCreationTokens)
+  const cacheReadTokens = readNumber(payload.cacheReadTokens) ?? legacyCachedTokens
   const hasTokenBreakdown =
     inputTokens !== undefined ||
     outputTokens !== undefined ||
-    cachedTokens !== undefined
+    cacheCreationTokens !== undefined ||
+    cacheReadTokens !== undefined
   const explicitTotal =
     readNumber(payload.totalTokens) ??
     readNumber(payload.total_tokens) ??
     readNumber(params.get('totalTokens')) ??
     readNumber(params.get('tokens'))
   const legacyTotal =
-    (inputTokens ?? 0) + (outputTokens ?? 0) + (cachedTokens ?? 0)
+    (inputTokens ?? 0) +
+    (outputTokens ?? 0) +
+    (cacheCreationTokens ?? 0) +
+    (cacheReadTokens ?? 0)
   const totalSource = explicitTotal ?? (hasTokenBreakdown ? legacyTotal : undefined)
 
   if (totalSource === undefined) {
@@ -579,7 +612,8 @@ function readPosterUrlState(): ReportState | null {
     metricIds: metricIds?.length === 3 ? metricIds : ['phone', 'ev', 'kettle'],
     ...(inputTokens !== undefined ? { inputTokens } : {}),
     ...(outputTokens !== undefined ? { outputTokens } : {}),
-    ...(cachedTokens !== undefined ? { cachedTokens } : {}),
+    ...(cacheCreationTokens !== undefined ? { cacheCreationTokens } : {}),
+    ...(cacheReadTokens !== undefined ? { cacheReadTokens } : {}),
     ...(typeof payload.source === 'string' ? { source: payload.source } : {}),
     ...(scope ? { scope } : {}),
     ...(typeof payload.funLine === 'string' && payload.funLine.trim()
@@ -675,7 +709,8 @@ function App() {
     const breakdownValues = [
       state.inputTokens ?? 0,
       state.outputTokens ?? 0,
-      state.cachedTokens ?? 0,
+      state.cacheCreationTokens ?? 0,
+      state.cacheReadTokens ?? 0,
     ]
     const breakdownTotal = breakdownValues.reduce((sum, value) => sum + value, 0)
     const breakdown =
@@ -686,12 +721,13 @@ function App() {
             share: (breakdownValues[index] / breakdownTotal) * 100,
           }))
         : null
-    const cacheShare = breakdown ? breakdown[2].share : 0
+    const cacheShare = breakdown ? breakdown[3].share : 0
 
     const kwh = breakdown
       ? ((breakdownValues[0] * WH_PER_1K_INPUT +
           breakdownValues[1] * WH_PER_1K_OUTPUT +
-          breakdownValues[2] * WH_PER_1K_CACHED) /
+          breakdownValues[2] * WH_PER_1K_CACHE_CREATE +
+          breakdownValues[3] * WH_PER_1K_CACHE_READ) /
           1_000) *
         0.001
       : (totalTokens / 1_000) * state.whPerThousand * 0.001
@@ -736,7 +772,8 @@ function App() {
           : energyMetricPool.slice(0, 3),
     }
   }, [
-    state.cachedTokens,
+    state.cacheCreationTokens,
+    state.cacheReadTokens,
     state.funLine,
     state.history,
     state.inputTokens,
@@ -785,7 +822,8 @@ function App() {
         metricIds: randomMetricIds(),
         inputTokens: undefined,
         outputTokens: undefined,
-        cachedTokens: undefined,
+        cacheCreationTokens: undefined,
+        cacheReadTokens: undefined,
         source: 'manual',
       }
     })
@@ -1094,7 +1132,7 @@ function App() {
               <strong>超过 {computed.percentile.toFixed(1)}% 的开发者</strong>
               <p className="hero-quip">「{computed.quip}」</p>
               {computed.breakdown ? (
-                <div className="token-ledger" aria-label="Token 构成">
+                <div className="token-ledger breakdown-ledger" aria-label="Token 构成">
                   {computed.breakdown.map((series) => (
                     <div className={`ledger-item ${series.key}`} key={series.key}>
                       <span>{series.label}</span>

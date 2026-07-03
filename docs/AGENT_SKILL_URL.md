@@ -50,7 +50,8 @@ The poster URL consumes a `DailyTokenUsage` object:
   "handle": "agent-name",
   "inputTokens": 5200000,
   "outputTokens": 3420000,
-  "cachedTokens": 0,
+  "cacheCreationTokens": 0,
+  "cacheReadTokens": 0,
   "totalTokens": 8620000,
   "whPerThousand": 0.4,
   "metricIds": ["phone", "ev", "kettle"],
@@ -60,7 +61,7 @@ The poster URL consumes a `DailyTokenUsage` object:
 }
 ```
 
-If `metricIds` or `history` are omitted, the template uses stable defaults. `totalTokens` is preferred. If it is absent, the page can derive a total from `inputTokens + outputTokens + cachedTokens`.
+If `metricIds` or `history` are omitted, the template uses stable defaults. `totalTokens` is preferred. If it is absent, the page can derive a total from `inputTokens + outputTokens + cacheCreationTokens + cacheReadTokens`.
 
 The numbers above are documentation examples only. A remote agent must not reuse them as defaults. Before rendering, the agent must read `/.well-known/prompts/current-token-usage.md` and obtain exact usage evidence for its current run/session. If exact usage is not available, it must return `usage_unavailable` and skip rendering.
 

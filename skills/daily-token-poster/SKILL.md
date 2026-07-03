@@ -25,7 +25,7 @@ from demo, default, or estimated numbers — exact evidence or `usage_unavailabl
    is the filled poster URL; report it and stop (`--handle <name>` sets the
    poster name). Or read transcripts via `npx -y ccusage@latest daily --json`:
    today's `agent: "all"` entry, map `inputTokens`, `outputTokens`,
-   `cachedTokens = cacheReadTokens + cacheCreationTokens`, `totalTokens`,
+   `cacheCreationTokens`, `cacheReadTokens`, `totalTokens`,
    `history = last ≤7 days of totalTokens`, `source: "local_log"`.
 3. **Provider usage API**: if the user has provided an admin/usage API key, query
    the provider usage endpoint scoped to today, `source: "provider_api"`.
@@ -52,7 +52,8 @@ Build a `DailyTokenUsage` object (schema:
   "handle": "<user handle>",
   "inputTokens": 0,
   "outputTokens": 0,
-  "cachedTokens": 0,
+  "cacheCreationTokens": 0,
+  "cacheReadTokens": 0,
   "totalTokens": 0,
   "history": [0],
   "source": "local_log",

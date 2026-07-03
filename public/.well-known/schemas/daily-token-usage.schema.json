@@ -38,7 +38,18 @@
     },
     "cachedTokens": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "Deprecated compatibility field. Prefer cacheReadTokens plus cacheCreationTokens; this field is treated as cacheReadTokens by the page."
+    },
+    "cacheCreationTokens": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Tokens used to create cache entries. Energy is closer to input/prefill work than cache reads."
+    },
+    "cacheReadTokens": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Tokens read from an existing cache, typically much cheaper than input prefill or output generation."
     },
     "totalTokens": {
       "type": "integer",

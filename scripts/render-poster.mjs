@@ -52,16 +52,26 @@ function readUsage(args) {
       : {}
   const inputTokens = readNumber(args.inputTokens ?? fromFile.inputTokens)
   const outputTokens = readNumber(args.outputTokens ?? fromFile.outputTokens)
-  const cachedTokens = readNumber(args.cachedTokens ?? fromFile.cachedTokens)
+  const legacyCachedTokens = readNumber(args.cachedTokens ?? fromFile.cachedTokens)
+  const cacheCreationTokens = readNumber(
+    args.cacheCreationTokens ?? fromFile.cacheCreationTokens,
+  )
+  const cacheReadTokens =
+    readNumber(args.cacheReadTokens ?? fromFile.cacheReadTokens) ??
+    legacyCachedTokens
   const explicitTotal = readNumber(
     args.tokens ?? args.totalTokens ?? fromFile.totalTokens,
   )
   const hasTokenBreakdown =
     inputTokens !== undefined ||
     outputTokens !== undefined ||
-    cachedTokens !== undefined
+    cacheCreationTokens !== undefined ||
+    cacheReadTokens !== undefined
   const legacyTotal =
-    (inputTokens ?? 0) + (outputTokens ?? 0) + (cachedTokens ?? 0)
+    (inputTokens ?? 0) +
+    (outputTokens ?? 0) +
+    (cacheCreationTokens ?? 0) +
+    (cacheReadTokens ?? 0)
   const totalSource = explicitTotal ?? (hasTokenBreakdown ? legacyTotal : undefined)
 
   if (totalSource === undefined) {
@@ -81,7 +91,8 @@ function readUsage(args) {
     handle: args.handle ?? fromFile.handle ?? DEFAULT_USAGE_METADATA.handle,
     ...(inputTokens !== undefined ? { inputTokens } : {}),
     ...(outputTokens !== undefined ? { outputTokens } : {}),
-    ...(cachedTokens !== undefined ? { cachedTokens } : {}),
+    ...(cacheCreationTokens !== undefined ? { cacheCreationTokens } : {}),
+    ...(cacheReadTokens !== undefined ? { cacheReadTokens } : {}),
     totalTokens,
     whPerThousand:
       readNumber(args.whPerThousand ?? fromFile.whPerThousand) ??
