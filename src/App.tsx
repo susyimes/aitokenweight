@@ -86,6 +86,11 @@ type RankProfile = {
   capped: boolean
 }
 
+type ReadingReference = {
+  tokens: number
+  format: (count: string) => string
+}
+
 const STORAGE_KEY = 'aitokenweight-state'
 const DEFAULT_TOTAL_TOKENS = 8_620_000
 const DEFAULT_WH_PER_THOUSAND = 0.4
@@ -219,8 +224,33 @@ const formatCompact = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
-// 《红楼梦》全本约 73 万字，按中文约 1.5 token/字折算
-const TOKENS_PER_HONGLOUMENG = 1_100_000
+// 文字量参照物按公开字数/常见篇幅粗略折算：中文约 1.5 token/字。
+const readingReferencePool: ReadingReference[] = [
+  {
+    tokens: 15_000,
+    format: (count) => `写完 ${count} 篇万字长文`,
+  },
+  {
+    tokens: 300_000,
+    format: (count) => `读完 ${count} 本 20 万字长篇小说`,
+  },
+  {
+    tokens: 1_100_000,
+    format: (count) => `读完 ${count} 本《红楼梦》`,
+  },
+  {
+    tokens: 1_200_000,
+    format: (count) => `读完 ${count} 本《西游记》`,
+  },
+  {
+    tokens: 1_300_000,
+    format: (count) => `读完 ${count} 套《三体》三部曲`,
+  },
+  {
+    tokens: 4_800_000,
+    format: (count) => `读完 ${count} 套《哈利·波特》中文版`,
+  },
+]
 
 const MACHINE_SOURCES = ['agent_runtime', 'local_log', 'provider_api']
 
@@ -255,14 +285,29 @@ function cacheQuipFor(share: number) {
   return '缓存偏低，上下文天天见新'
 }
 
-function readingEquivalent(total: number) {
-  const books = total / TOKENS_PER_HONGLOUMENG
+function hashString(value: string) {
+  let hash = 0
 
-  if (books >= 1) {
-    return `读完 ${formatMetricValue(books)} 本《红楼梦》`
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
   }
 
-  return `${formatMetricValue(total / 1.5 / 10_000)} 万字阅读量`
+  return hash
+}
+
+function readingEquivalent(total: number, seed: string) {
+  if (total < 120_000) {
+    return `${formatMetricValue(total / 1.5 / 10_000)} 万字阅读量`
+  }
+
+  const candidates = readingReferencePool.filter(
+    (reference) => total >= reference.tokens * 0.45,
+  )
+  const pool = candidates.length ? candidates : readingReferencePool
+  const index = hashString(`${Math.round(total)}:${seed}`) % pool.length
+  const reference = pool[index]
+
+  return reference.format(formatMetricValue(total / reference.tokens))
 }
 
 function trendDayLabels(reportDate: string) {
@@ -760,7 +805,7 @@ function App() {
       quip: quipFor(totalTokens),
       readingLine: state.funLine?.trim()
         ? state.funLine.trim()
-        : `≈ ${readingEquivalent(totalTokens)}的文字量`,
+        : `≈ ${readingEquivalent(totalTokens, state.metricIds.join('|'))}的文字量`,
       breakdown,
       cacheShare,
       cacheQuip: cacheQuipFor(cacheShare),
