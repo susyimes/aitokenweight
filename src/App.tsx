@@ -997,16 +997,30 @@ function App() {
                 aitoken<span>weight</span>
               </span>
             </div>
-            <div className="step-pills" aria-label="流程">
-              <span className="active">01 输入</span>
-              <span>02 海报</span>
-            </div>
           </header>
+
+          <aside className="agent-card compact" aria-label="让 AI 自动生成">
+            <div className="agent-card-head">
+              <Bot aria-hidden="true" />
+              <div>
+                <strong>懒得查？复制给 AI 自动生成</strong>
+                <span>
+                  复制发给 Claude Code / Codex 等任意 agent，指令自带降级方案，
+                  它会自动查询你的 token 消耗并回你一张填好的海报链接。
+                </span>
+              </div>
+              <button type="button" onClick={copyAgentPrompt}>
+                <Copy aria-hidden="true" />
+                复制
+              </button>
+            </div>
+            <code>{agentPrompt}</code>
+          </aside>
 
           <form className="compose-card" onSubmit={generatePoster}>
             <div className="compose-copy">
               <span className="eyebrow">AI energy poster</span>
-              <h1>把今天的 Token 变成一张能量海报</h1>
+              <h1>生成今日 Token 能量海报</h1>
             </div>
 
             <label className="hero-input">
@@ -1075,26 +1089,6 @@ function App() {
               {notice}
             </output>
           </form>
-
-          <aside className="agent-card" aria-label="让 AI 自动生成">
-            <div className="agent-card-head">
-              <Bot aria-hidden="true" />
-              <div>
-                <strong>懒得查？把这段话丢给你的 AI</strong>
-                <span>
-                  复制发给 Claude Code / Codex 等任意 agent，指令自带降级方案，
-                  它会自动查询你的 token 消耗并回你一张填好的海报链接。
-                </span>
-              </div>
-            </div>
-            <div className="agent-line">
-              <code>{agentPrompt}</code>
-              <button type="button" onClick={copyAgentPrompt}>
-                <Copy aria-hidden="true" />
-                复制
-              </button>
-            </div>
-          </aside>
         </section>
       ) : (
         <section className="result-page" aria-label="Token 海报结果">

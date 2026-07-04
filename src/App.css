@@ -11,15 +11,15 @@
 .compose-page {
   min-height: calc(100svh - 36px);
   display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 18px;
+  grid-template-rows: auto auto 1fr;
+  gap: 14px;
 }
 
 .compose-header,
 .result-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
   width: min(1080px, 100%);
   margin: 0 auto;
@@ -66,38 +66,13 @@
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.36);
 }
 
-.step-pills {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px;
-  background: rgba(255, 253, 247, 0.72);
-  border: 1px solid rgba(22, 24, 23, 0.12);
-  border-radius: 8px;
-}
-
-.step-pills span {
-  min-width: 78px;
-  padding: 8px 12px;
-  color: #62665f;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 850;
-  text-align: center;
-}
-
-.step-pills .active {
-  color: #fffdf7;
-  background: #161817;
-}
-
 .compose-card {
-  align-self: center;
+  align-self: start;
   justify-self: center;
   width: min(760px, 100%);
   display: grid;
-  gap: 22px;
-  padding: 40px;
+  gap: 18px;
+  padding: 32px 40px 34px;
   color: #161817;
   background:
     linear-gradient(90deg, #161817 0 12px, transparent 12px),
@@ -109,7 +84,7 @@
 
 .compose-copy {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .eyebrow {
@@ -127,9 +102,10 @@
   max-width: 620px;
   margin: 0;
   color: #101211;
-  font-size: clamp(2.25rem, 6vw, 4.6rem);
-  line-height: 0.98;
+  font-size: clamp(1.9rem, 4.8vw, 3rem);
+  line-height: 1.05;
   font-weight: 930;
+  white-space: nowrap;
 }
 
 .hero-input,
@@ -164,8 +140,8 @@
 }
 
 .hero-input input {
-  min-height: 82px;
-  font-size: clamp(2rem, 8vw, 4rem);
+  min-height: 70px;
+  font-size: clamp(1.75rem, 7vw, 3.35rem);
   line-height: 1;
 }
 
@@ -195,7 +171,7 @@
 .quick-values button,
 .result-toolbar button,
 .compose-actions button {
-  min-height: 42px;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -286,7 +262,7 @@
 .compose-actions {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px;
+  gap: 8px;
 }
 
 .primary-action,
@@ -1122,20 +1098,37 @@
   }
 
   .compose-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .step-pills {
-    width: 100%;
-  }
-
-  .step-pills span {
-    flex: 1;
+    align-items: center;
   }
 
   .compose-card {
-    padding: 30px 22px 24px 28px;
+    gap: 16px;
+    padding: 24px 20px 22px 26px;
+  }
+
+  .compose-copy h1 {
+    font-size: clamp(1.52rem, 7.3vw, 2rem);
+  }
+
+  .hero-input input {
+    min-height: 64px;
+  }
+
+  .agent-card.compact {
+    padding: 13px 14px 14px;
+  }
+
+  .agent-card.compact .agent-card-head {
+    grid-template-columns: auto 1fr;
+  }
+
+  .agent-card.compact .agent-card-head button {
+    grid-column: 1 / -1;
+    min-height: 40px;
+  }
+
+  .agent-card.compact > code {
+    font-size: 0.76rem;
   }
 
   .compose-actions {
@@ -1304,10 +1297,24 @@
   border-radius: 8px;
 }
 
+.agent-card.compact {
+  gap: 10px;
+  padding: 14px 18px 16px;
+  background: rgba(255, 253, 247, 0.74);
+  border-style: solid;
+}
+
 .agent-card-head {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+}
+
+.agent-card.compact .agent-card-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
 }
 
 .agent-card-head svg {
@@ -1315,6 +1322,11 @@
   height: 22px;
   flex-shrink: 0;
   color: #161817;
+}
+
+.agent-card.compact .agent-card-head > svg {
+  width: 20px;
+  height: 20px;
 }
 
 .agent-card-head div {
@@ -1328,9 +1340,64 @@
   font-weight: 850;
 }
 
+.agent-card.compact .agent-card-head strong {
+  font-size: 0.9rem;
+}
+
 .agent-card-head span {
   font-size: 0.82rem;
   line-height: 1.5;
+}
+
+.agent-card.compact .agent-card-head span {
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.agent-card.compact > code {
+  display: block;
+  padding: 8px 10px;
+  overflow-wrap: anywhere;
+  color: #161817;
+  font-family: inherit;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  background: #ece6d7;
+  border: 1px solid rgba(22, 24, 23, 0.12);
+  border-radius: 6px;
+  user-select: all;
+}
+
+.agent-card.compact .agent-card-head button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  color: #111514;
+  background: #f3c75b;
+  border: 1px solid rgba(22, 24, 23, 0.14);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 850;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.agent-card.compact .agent-card-head button:hover {
+  transform: translateY(-1px);
+  background: #ffd36f;
+  box-shadow: 0 10px 22px rgba(22, 24, 23, 0.1);
+}
+
+.agent-card.compact .agent-card-head button svg {
+  width: 16px;
+  height: 16px;
 }
 
 .agent-line {
