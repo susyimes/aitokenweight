@@ -94,6 +94,7 @@ type ReadingReference = {
 const STORAGE_KEY = 'aitokenweight-state'
 const DEFAULT_TOTAL_TOKENS = 8_620_000
 const DEFAULT_WH_PER_THOUSAND = 0.4
+const DEFAULT_TIMEZONE = 'Asia/Shanghai'
 
 // 分项能耗模型（Wh / 1K tokens，含数据中心开销）。输出 token 需完整
 // 自回归推理；输入和缓存创建走 prefill；缓存读取近乎只有显存带宽成本。
@@ -386,8 +387,24 @@ const samplePresets: Array<
   },
 ]
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10)
+function dateIsoInTimeZone(date: Date, timeZone = DEFAULT_TIMEZONE) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value]),
+  )
+
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+function todayIso(date = new Date()) {
+  return dateIsoInTimeZone(date)
 }
 
 function seedHistory(total: number) {
