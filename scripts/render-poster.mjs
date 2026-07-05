@@ -4,27 +4,9 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const DEFAULT_TIMEZONE = 'Asia/Shanghai'
-
-function dateIsoInTimeZone(date, timeZone = DEFAULT_TIMEZONE) {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(date)
-  const values = Object.fromEntries(
-    parts
-      .filter((part) => part.type !== 'literal')
-      .map((part) => [part.type, part.value]),
-  )
-
-  return `${values.year}-${values.month}-${values.day}`
-}
-
 const DEFAULT_USAGE_METADATA = {
-  date: dateIsoInTimeZone(new Date()),
-  timezone: DEFAULT_TIMEZONE,
+  date: new Date().toISOString().slice(0, 10),
+  timezone: 'Asia/Shanghai',
   provider: 'agent-runtime',
   handle: 'susyimes',
   whPerThousand: 0.4,
