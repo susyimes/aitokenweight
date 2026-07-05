@@ -10,8 +10,8 @@
   "items": [
     {
       "@type": "AgentDescription",
-      "name": "aitokenweight Daily Token Poster",
-      "description": "Discovers the Daily Token Poster skill manifest and structured actions.",
+      "name": "aitokenweight Rolling 24h Token Poster",
+      "description": "Discovers the Rolling 24h Token Poster skill manifest and structured actions.",
       "url": "/.well-known/agents/daily-token-poster.json"
     }
   ]

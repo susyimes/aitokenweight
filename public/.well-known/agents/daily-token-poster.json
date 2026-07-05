@@ -3,13 +3,13 @@
   "protocolVersion": "1.1",
   "type": "AgentDescription",
   "url": "/.well-known/agents/daily-token-poster.json",
-  "name": "aitokenweight Daily Token Poster",
+  "name": "aitokenweight Rolling 24h Token Poster",
   "owner": {
     "type": "Person",
     "name": "susyimes",
     "url": "https://github.com/susyimes"
   },
-  "description": "ANP-facing entrypoint for a skill that collects daily AI token usage, normalizes it, and renders an aitokenweight share poster. ANP provides discovery, identity, capability description, and invocation metadata; token collection and image rendering are application-level skill actions.",
+  "description": "ANP-facing entrypoint for a skill that collects rolling last-24-hours AI token usage, normalizes it, and renders an aitokenweight share poster. ANP provides discovery, identity, capability description, and invocation metadata; token collection and image rendering are application-level skill actions.",
   "created": "2026-07-02T00:00:00Z",
   "securityDefinitions": {
     "user_grant": {
@@ -37,7 +37,7 @@
     },
     {
       "type": "Information",
-      "description": "Prompt that requires exact current token usage evidence and forbids demo/default usage values.",
+      "description": "Prompt that requires exact rolling 24h token usage evidence, or a clearly labeled day/session fallback, and forbids demo/default usage values.",
       "url": "/.well-known/prompts/current-token-usage.md"
     },
     {
