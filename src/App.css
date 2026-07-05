@@ -1708,3 +1708,110 @@
     font-size: 0.58rem;
   }
 }
+
+/* PNG export must be stable regardless of the browser viewport. Mobile media
+   rules otherwise shrink the poster before html-to-image captures it. */
+.report-poster.export-compact {
+  width: 760px;
+  max-width: 760px;
+  box-sizing: border-box;
+  padding: 34px 44px 22px;
+}
+
+.report-poster.export-compact .poster-meta {
+  justify-items: end;
+}
+
+.report-poster.export-compact .poster-brand {
+  font-size: 1.5rem;
+}
+
+.report-poster.export-compact .rank-badge {
+  min-width: 300px;
+  max-width: none;
+  margin-top: 34px;
+  flex-wrap: nowrap;
+  padding: 6px 18px;
+}
+
+.report-poster.export-compact .rank-next {
+  margin-left: 0;
+  padding-left: 12px;
+  justify-items: stretch;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.report-poster.export-compact .spread-title {
+  gap: 17px;
+  font-size: 0.86rem;
+}
+
+.report-poster.export-compact .token-hero h1 {
+  font-size: 5.85rem;
+}
+
+.report-poster.export-compact .token-ledger {
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.report-poster.export-compact .token-ledger.breakdown-ledger {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.report-poster.export-compact .ledger-item {
+  gap: 3px;
+  padding: 8px 10px 7px;
+}
+
+.report-poster.export-compact .metric-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.report-poster.export-compact .metric-card {
+  min-height: 112px;
+  padding: 12px 8px;
+}
+
+.report-poster.export-compact .metric-card strong {
+  font-size: 2.18rem;
+}
+
+.report-poster.export-compact .energy-value strong {
+  font-size: 4.05rem;
+}
+
+.report-poster.export-compact .energy-value span {
+  font-size: 1.28rem;
+}
+
+.report-poster.export-compact .trend-panel {
+  grid-template-columns: 0.72fr 1.28fr;
+}
+
+.report-poster.export-compact .trend-panel.solo {
+  grid-template-columns: 1fr;
+}
+
+.report-poster.export-compact .streak {
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: none;
+}
+
+.report-poster.export-compact .trend-panel.solo .streak {
+  border-right: none;
+}
+
+.report-poster.export-compact .poster-footer {
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+}
+
+.report-poster.export-compact .poster-footer p {
+  text-align: center;
+}
+
+.report-poster.export-compact .poster-footer strong {
+  text-align: right;
+}
