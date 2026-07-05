@@ -81,12 +81,11 @@
     "scope": {
       "type": "string",
       "enum": [
-        "rolling_24h",
         "day",
         "session"
       ],
-      "default": "rolling_24h",
-      "description": "rolling_24h: exact rolling last-24-hours usage ending now; day: calendar-day usage; session: current conversation only (the poster titles itself accordingly)."
+      "default": "day",
+      "description": "day: full-day usage; session: current conversation only (the poster titles itself accordingly)."
     },
     "funLine": {
       "type": "string",

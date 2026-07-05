@@ -2,11 +2,11 @@
   "schema": "mcp.toolset.v1",
   "name": "aitokenweight-daily-token-poster",
   "version": "1.0.0",
-  "description": "MCP-compatible tool definitions for the aitokenweight Rolling 24h Token Poster skill.",
+  "description": "MCP-compatible tool definitions for the aitokenweight Daily Token Poster skill.",
   "tools": [
     {
       "name": "collectUsage",
-      "description": "Collect exact rolling 24h token usage from runtime telemetry, provider API, timestamped local log, or manual input, then normalize it. If only calendar-day or session usage is available, label that scope; if no exact usage is available, report usage_unavailable instead of using defaults.",
+      "description": "Collect exact token usage for the current agent run/session from runtime telemetry, provider API, local log, or manual input, then normalize it. If exact current usage is unavailable, report usage_unavailable instead of using defaults.",
       "requiresHumanAuthorization": true,
       "requiredScopes": [
         "token_usage:read"

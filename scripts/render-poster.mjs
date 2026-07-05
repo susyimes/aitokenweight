@@ -11,7 +11,6 @@ const DEFAULT_USAGE_METADATA = {
   handle: 'susyimes',
   whPerThousand: 0.4,
   metricIds: ['phone', 'ev', 'kettle'],
-  scope: 'rolling_24h',
   source: 'agent_runtime',
 }
 
@@ -98,7 +97,6 @@ function readUsage(args) {
     whPerThousand:
       readNumber(args.whPerThousand ?? fromFile.whPerThousand) ??
       DEFAULT_USAGE_METADATA.whPerThousand,
-    scope: args.scope ?? fromFile.scope ?? DEFAULT_USAGE_METADATA.scope,
     source: args.source ?? fromFile.source ?? DEFAULT_USAGE_METADATA.source,
   }
 }

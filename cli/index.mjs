@@ -142,7 +142,6 @@ const usage = {
   totalTokens: today.totalTokens,
   whPerThousand: Number(args.wh ?? 0.4),
   history: entries.slice(-7).map((entry) => entry.totalTokens),
-  scope: 'day',
   source: 'local_log',
   usageEvidence: `ccusage daily --json over local Claude Code transcripts for ${date}`,
 }

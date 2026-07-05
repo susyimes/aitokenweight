@@ -1,9 +1,9 @@
 {
   "schema": "agent-skill-url.v1",
   "id": "aitokenweight.daily-token-poster",
-  "name": "Rolling 24h Token Poster",
+  "name": "Daily Token Poster",
   "version": "1.0.0",
-  "description": "Collect rolling last-24-hours AI token usage and render a shareable aitokenweight poster image.",
+  "description": "Collect today's AI token usage and render a shareable aitokenweight poster image.",
   "protocolEnvelope": {
     "type": "ANP",
     "agentDescription": "/.well-known/agents/daily-token-poster.json",
@@ -21,7 +21,7 @@
     "currentTokenUsage": {
       "url": "/.well-known/prompts/current-token-usage.md",
       "rawUrl": "https://raw.githubusercontent.com/susyimes/aitokenweight/main/public/.well-known/prompts/current-token-usage.md",
-      "description": "Prompt for a remote agent to report exact rolling 24h token usage, clearly labeled calendar-day/session fallback, or usage_unavailable without using defaults."
+      "description": "Prompt for a remote agent to report exact current token usage or usage_unavailable without using defaults."
     }
   },
   "strictUsagePolicy": {
@@ -29,11 +29,10 @@
     "demoTokenUsageAllowedForRendering": false,
     "onMissingExactUsage": "Return usage_unavailable and do not call renderPoster.",
     "acceptedEvidence": [
-      "rolling 24h runtime usage object",
-      "timestamped local logs filtered to now minus 24 hours through now",
+      "current request or run usage object",
       "current session CLI/runtime final usage line",
       "trace/span/local log entry for the current session",
-      "provider usage endpoint result scoped to the rolling last 24 hours"
+      "provider usage endpoint result scoped to this current run"
     ]
   },
   "inputs": {
@@ -41,7 +40,7 @@
     "timezone": "IANA timezone, default Asia/Shanghai",
     "provider": "agent-runtime|openai|anthropic|gemini|local|manual|auto",
     "handle": "string",
-    "usage": "DailyTokenUsage with exact rolling 24h token evidence, or clearly labeled day/session fallback; required before rendering"
+    "usage": "DailyTokenUsage with exact current token evidence; required before rendering"
   },
   "requires": [
     {
@@ -58,7 +57,7 @@
     "collectUsage": {
       "transport": "mcp",
       "tool": "collectUsage",
-      "description": "Read exact rolling 24h usage evidence and normalize it to DailyTokenUsage, or return a clearly labeled day/session fallback or usage_unavailable without rendering."
+      "description": "Read exact current run/session usage evidence and normalize it to DailyTokenUsage, or return usage_unavailable without rendering."
     },
     "renderPoster": {
       "transport": "mcp",
@@ -76,8 +75,8 @@
       "description": "Deterministically render poster.png from a DailyTokenUsage JSON file using the local browser template."
     },
     "renderPosterFromExactTotal": {
-      "command": "npm run render:poster -- --tokens <exact-rolling-24h-total-tokens> --handle <agent-handle> --source agent_runtime --out dist/aitokenweight-poster.png",
-      "description": "Render only after the agent has exact rolling 24h token usage evidence, or a clearly labeled day/session fallback. Do not substitute demo or default values."
+      "command": "npm run render:poster -- --tokens <exact-current-total-tokens> --handle <agent-handle> --source agent_runtime --out dist/aitokenweight-poster.png",
+      "description": "Render only after the agent has exact current token usage evidence. Do not substitute demo or default values."
     }
   },
   "remoteExecution": {
@@ -88,8 +87,8 @@
       "npm ci",
       "npx playwright install chromium",
       "read .well-known prompt: public/.well-known/prompts/current-token-usage.md",
-      "if exact rolling 24h token usage is available: write usage.json with scope rolling_24h and run npm run render:poster -- --usage usage.json --out dist/aitokenweight-poster.png",
-      "if no exact rolling 24h, calendar-day, or session usage is available: return usage_unavailable and do not render"
+      "if exact current token usage is available: write usage.json and run npm run render:poster -- --usage usage.json --out dist/aitokenweight-poster.png",
+      "if exact current token usage is unavailable: return usage_unavailable and do not render"
     ],
     "artifact": "dist/aitokenweight-poster.png",
     "notes": [

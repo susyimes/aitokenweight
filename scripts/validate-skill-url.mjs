@@ -70,9 +70,9 @@ assert(
 )
 assert(
   skill.localCommands?.renderPosterFromExactTotal?.command?.includes(
-    '<exact-rolling-24h-total-tokens>',
+    '<exact-current-total-tokens>',
   ),
-  'Skill manifest must require an exact rolling 24h total placeholder',
+  'Skill manifest must require an exact current total placeholder',
 )
 assert(
   skill.repository?.cloneUrl === 'https://github.com/susyimes/aitokenweight.git',
@@ -111,10 +111,6 @@ assert(
 assert(
   usageSchema.properties?.source?.enum?.includes('agent_runtime'),
   'DailyTokenUsage source enum must include agent_runtime',
-)
-assert(
-  usageSchema.properties?.scope?.enum?.includes('rolling_24h'),
-  'DailyTokenUsage scope enum must include rolling_24h',
 )
 assert(
   resultSchema.required?.includes('posterPng'),
@@ -163,10 +159,8 @@ const sampleUsage = {
   whPerThousand: 0.4,
   metricIds: ['phone', 'ev', 'kettle'],
   history: [4137600, 4913400, 3620400, 6034000, 4568600, 7068400, 8620000],
-  scope: 'rolling_24h',
   source: 'agent_runtime',
-  usageEvidence:
-    'validator fixture only; rolling 24h window example, not a default runtime usage value',
+  usageEvidence: 'validator fixture only; not a default runtime usage value',
 }
 const encoded = Buffer.from(JSON.stringify(sampleUsage), 'utf8').toString(
   'base64url',
