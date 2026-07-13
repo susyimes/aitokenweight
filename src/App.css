@@ -105,7 +105,7 @@
   font-size: clamp(1.9rem, 4.8vw, 3rem);
   line-height: 1.05;
   font-weight: 930;
-  white-space: nowrap;
+  text-wrap: balance;
 }
 
 .hero-input,
@@ -386,10 +386,18 @@
   font-size: 1.05rem;
 }
 
-.poster-meta span {
+.poster-meta > .poster-user {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.poster-handle {
+  display: block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .poster-meta svg {
@@ -592,11 +600,42 @@
   font-weight: 780;
 }
 
+.comparison-kicker {
+  width: max-content;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 30px auto 0;
+  padding: 7px 11px;
+  color: #62665f;
+  background: #ece6d7;
+  border: 1px dashed rgba(22, 24, 23, 0.2);
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+.comparison-kicker.agent-made {
+  color: #126044;
+  background: rgba(94, 215, 183, 0.14);
+  border-color: rgba(28, 133, 90, 0.34);
+  border-style: solid;
+}
+
+.comparison-kicker svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.8;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-top: 34px;
+  margin-top: 12px;
 }
 
 .metric-card {
@@ -681,6 +720,8 @@
   color: #777b74;
   font-size: 0.92rem;
   font-weight: 760;
+  line-height: 1.28;
+  text-wrap: balance;
 }
 
 .trend-panel {
@@ -1006,9 +1047,21 @@
   font-size: 0.84rem;
 }
 
+.report-poster.export-compact .comparison-kicker {
+  gap: 6px;
+  margin-top: 18px;
+  padding: 5px 9px;
+  font-size: 0.64rem;
+}
+
+.report-poster.export-compact .comparison-kicker svg {
+  width: 13px;
+  height: 13px;
+}
+
 .report-poster.export-compact .metric-grid {
   gap: 8px;
-  margin-top: 22px;
+  margin-top: 8px;
 }
 
 .report-poster.export-compact .metric-card {
@@ -1173,11 +1226,22 @@
   }
 
   .poster-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 112px;
     align-items: flex-start;
+    gap: 8px;
   }
 
   .poster-meta {
-    justify-items: start;
+    min-width: 0;
+    width: 112px;
+    max-width: none;
+    justify-items: end;
+    text-align: right;
+  }
+
+  .poster-handle {
+    max-width: 112px;
   }
 
   .poster-brand {
@@ -1226,6 +1290,13 @@
 
   .metric-grid {
     gap: 8px;
+  }
+
+  .comparison-kicker {
+    width: auto;
+    justify-content: center;
+    margin-top: 24px;
+    font-size: 0.68rem;
   }
 
   .energy-value {

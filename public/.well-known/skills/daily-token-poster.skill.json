@@ -3,7 +3,7 @@
   "id": "aitokenweight.daily-token-poster",
   "name": "Daily Token Poster",
   "version": "1.0.0",
-  "description": "Collect today's AI token usage and render a shareable aitokenweight poster image.",
+  "description": "Collect today's AI token usage, invent fresh copy and three energy comparisons, and render a shareable aitokenweight poster.",
   "protocolEnvelope": {
     "type": "ANP",
     "agentDescription": "/.well-known/agents/daily-token-poster.json",

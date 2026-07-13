@@ -55,7 +55,7 @@
     },
     {
       "name": "renderPoster",
-      "description": "Render DailyTokenUsage into a shareable PNG with the aitokenweight template.",
+      "description": "Render DailyTokenUsage plus Agent-authored funLine, verdict, energyLine, and three dynamic energyComparisons with the aitokenweight template.",
       "requiresHumanAuthorization": false,
       "inputSchema": {
         "type": "object",

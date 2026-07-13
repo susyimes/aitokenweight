@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "/.well-known/schemas/daily-token-usage.schema.json",
   "title": "DailyTokenUsage",
+  "description": "Usage plus poster presentation fields. Agent-created poster links must include funLine, verdict, energyLine, and exactly three energyComparisons; those fields remain schema-optional only so older links and direct manual/CLI flows continue to render.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -67,7 +68,9 @@
       "maxItems": 3,
       "items": {
         "type": "string"
-      }
+      },
+      "deprecated": true,
+      "description": "Legacy fixed-card fallback. Agents creating poster links must use energyComparisons instead."
     },
     "history": {
       "type": "array",
@@ -90,7 +93,79 @@
     "funLine": {
       "type": "string",
       "maxLength": 48,
-      "description": "Optional creative one-liner equating the token volume to something vivid, rendered verbatim under the token count (e.g. ≈ 把《三体》三部曲通读 9 遍). Omit to let the page show its default equivalence."
+      "pattern": "^≈",
+      "description": "Fresh Agent-written token-volume metaphor for this exact report, rendered verbatim under the token count. Mandatory for Agent-created links; optional only for legacy/manual compatibility."
+    },
+    "verdict": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 36,
+      "description": "Fresh short playful verdict tailored to this report's magnitude. Do not include quote marks. Mandatory for Agent-created links."
+    },
+    "energyLine": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 48,
+      "description": "Fresh short sentence connecting the work to the computed energy. Mandatory for Agent-created links."
+    },
+    "energyComparisons": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "description": "Exactly three fresh, distinct energy comparisons invented by the Agent for this report. The page divides total kWh by whPerUnit; do not send precomputed counts.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "unit",
+          "whPerUnit",
+          "icon"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 18
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8
+          },
+          "whPerUnit": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1000000
+          },
+          "icon": {
+            "type": "string",
+            "enum": [
+              "phone",
+              "car",
+              "kettle",
+              "laptop",
+              "led",
+              "ac",
+              "fan",
+              "fridge",
+              "rice",
+              "washer",
+              "tv",
+              "coffee",
+              "battery",
+              "bike",
+              "game",
+              "music",
+              "projector",
+              "train",
+              "wifi",
+              "sparkles"
+            ]
+          }
+        }
+      }
     },
     "source": {
       "type": "string",
@@ -106,5 +181,11 @@
       "type": "string",
       "description": "Human-readable evidence for the usage source, such as a runtime usage object, CLI token line, trace id, provider usage query, or the derivation method for a conversation-derived estimate."
     }
-  }
+  },
+  "x-agentPresentationRequired": [
+    "funLine",
+    "verdict",
+    "energyLine",
+    "energyComparisons"
+  ]
 }

@@ -4,6 +4,6 @@
 
 ## For AI agents
 
-- [agent.md](./agent.md): instructions — collect the user's exact token usage for today and fill it into this page via `/?poster=1&data=<base64url DailyTokenUsage>`.
+- [agent.md](./agent.md): instructions — collect the user's exact token usage, dynamically invent fresh poster copy plus three energy comparisons, and fill the page via `/?poster=1&data=<base64url DailyTokenUsage>`.
 - [Skill manifest](./.well-known/skills/daily-token-poster.skill.json)
 - [Agent descriptions](./.well-known/agent-descriptions)

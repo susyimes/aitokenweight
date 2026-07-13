@@ -113,13 +113,20 @@ assert(
   'DailyTokenUsage source enum must include agent_runtime',
 )
 assert(
+  usageSchema['x-agentPresentationRequired']?.includes('energyComparisons') &&
+    usageSchema.properties?.energyComparisons?.minItems === 3 &&
+    usageSchema.properties?.energyComparisons?.maxItems === 3,
+  'Agent poster payloads must declare exactly three dynamic energy comparisons',
+)
+assert(
   resultSchema.required?.includes('posterPng'),
   'Poster result must require posterPng',
 )
 assert(
   appSource.includes('decodePosterPayload') &&
-    appSource.includes('readPosterUrlState'),
-  'App must include the URL payload poster entrypoint',
+    appSource.includes('readPosterUrlState') &&
+    appSource.includes('normalizeEnergyComparisons'),
+  'App must include the URL payload entrypoint and dynamic comparison parser',
 )
 assert(
   packageJson.scripts?.['render:poster'] === 'node scripts/render-poster.mjs',
@@ -145,6 +152,11 @@ assert(
     currentUsagePrompt.includes('No Markdown fences'),
   'current token usage prompt must require strict JSON output',
 )
+assert(
+  currentUsagePrompt.includes('exactly 3 distinct `energyComparisons`') &&
+    currentUsagePrompt.includes('Never reuse examples'),
+  'current token usage prompt must require fresh dynamic poster content',
+)
 
 const sampleUsage = {
   date: '2026-07-02',
@@ -157,8 +169,15 @@ const sampleUsage = {
   cacheReadTokens: 0,
   totalTokens: 8620000,
   whPerThousand: 0.4,
-  metricIds: ['phone', 'ev', 'kettle'],
   history: [4137600, 4913400, 3620400, 6034000, 4568600, 7068400, 8620000],
+  funLine: '≈ 把一整面需求墙塞进上下文八遍',
+  verdict: '今天的 AI 吃得比你认真',
+  energyLine: '灵感没有消失，只是去机房散了点热',
+  energyComparisons: [
+    { label: '给掌机回满一条命', unit: '次', whPerUnit: 40, icon: 'game' },
+    { label: '让路由器通宵巡夜', unit: '晚', whPerUnit: 80, icon: 'wifi' },
+    { label: '投影一场赛博电影', unit: '场', whPerUnit: 400, icon: 'projector' },
+  ],
   source: 'agent_runtime',
   usageEvidence: 'validator fixture only; not a default runtime usage value',
 }

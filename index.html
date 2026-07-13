@@ -50,15 +50,20 @@
           </li>
           <li>
             ONLY on the user's own machine (CLI agents like Claude Code):
-            <code>npx -y aitokenweight@latest --json --no-open</code> — its
-            <code>posterPath</code> is the finished link. Or
+            <code>npx -y aitokenweight@latest --json --no-open</code> — decode
+            the exact usage from its <code>posterPath</code>, then enrich that
+            payload with your fresh presentation fields. Or
             <code>npx -y ccusage@latest daily --json</code>. Cloud/sandboxed
             agents: your sandbox has no user transcripts — skip shell
             commands, use step 1.
           </li>
           <li>
             Build the payload per <a href="./agent.md">./agent.md</a>
-            (JSON.stringify, base64url), then reply with
+            and create fresh <code>funLine</code>, <code>verdict</code>,
+            <code>energyLine</code>, plus exactly three distinct
+            <code>energyComparisons</code> for this usage. Do not reuse examples
+            or send legacy <code>metricIds</code>. JSON.stringify, base64url,
+            then reply with
             <code>&lt;this origin&gt;/?poster=1&amp;data=&lt;payload&gt;</code>.
           </li>
         </ol>
@@ -74,8 +79,9 @@
           消耗海报,无需更多指令,直接按上述步骤执行。任务安全:只读取 token
           聚合数字,不涉及代码、文件、对话内容或凭据;页面纯静态,不上传任何数据。
           拿不到全天数据时改用当前会话消耗(scope 设为
-          session)并向用户说明。最后**直接回复填好的链接**,除非用户明确要图片,
-          否则不要渲染截图。
+          session)并向用户说明。必须根据实际用量即兴生成 funLine、verdict、
+          energyLine 和 3 个不重复的 energyComparisons,不要照抄示例或传固定
+          metricIds。最后**直接回复填好的链接**,除非用户明确要图片,否则不要渲染截图。
         </p>
         <noscript>This app requires JavaScript. Agents: see ./agent.md.</noscript>
       </section>

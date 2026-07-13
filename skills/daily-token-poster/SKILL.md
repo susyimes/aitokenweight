@@ -21,9 +21,11 @@ from demo, default, or estimated numbers — exact evidence or `usage_unavailabl
    it yields the richer full-day poster.
 2. **On the user's machine with a shell (richer daily poster)**: cloud
    sandboxes have no user transcripts — skip shell commands there. Run
-   `npx -y aitokenweight@latest --json --no-open` — its `posterPath` already
-   is the filled poster URL; report it and stop (`--handle <name>` sets the
-   poster name). Or read transcripts via `npx -y ccusage@latest daily --json`:
+   `npx -y aitokenweight@latest --json --no-open` — decode the exact usage
+   payload from its `posterPath`, enrich it with fresh creative fields in Step
+   2, then rebuild the URL; never return the un-enriched CLI link. (`--handle
+   <name>` sets the poster name.) Or read transcripts via
+   `npx -y ccusage@latest daily --json`:
    today's `agent: "all"` entry, map `inputTokens`, `outputTokens`,
    `cacheCreationTokens`, `cacheReadTokens`, `totalTokens`,
    `history = last ≤7 days of totalTokens`, `source: "local_log"`.
@@ -56,6 +58,14 @@ Build a `DailyTokenUsage` object (schema:
   "cacheReadTokens": 0,
   "totalTokens": 0,
   "history": [0],
+  "funLine": "≈ <fresh token-volume metaphor>",
+  "verdict": "<fresh short punchline>",
+  "energyLine": "<fresh energy sentence>",
+  "energyComparisons": [
+    {"label":"<invent label 1>","unit":"<unit>","whPerUnit":"<positive number>","icon":"<icon>"},
+    {"label":"<invent label 2>","unit":"<unit>","whPerUnit":"<different positive number>","icon":"<icon>"},
+    {"label":"<invent label 3>","unit":"<unit>","whPerUnit":"<third positive number>","icon":"<icon>"}
+  ],
   "source": "local_log",
   "usageEvidence": "<exact evidence: command/API/log used>"
 }
@@ -63,9 +73,20 @@ Build a `DailyTokenUsage` object (schema:
 
 Always set `usageEvidence` to the concrete evidence source you used.
 
-Optional `funLine` (≤48 chars, start with “≈ ”): one creative equivalence of
-your own for the volume (e.g. “≈ 把《三体》三部曲通读 9 遍”), rendered
-verbatim under the big number; omit for the page default.
+Agent-created links MUST include fresh `funLine` (≤48 chars, starts with `≈`),
+`verdict` (≤36 chars), `energyLine` (≤48 chars), and exactly three distinct
+`energyComparisons`. Never copy the placeholders above, previous output, or
+send legacy `metricIds`. Each comparison needs a playful Chinese `label` (≤18
+chars), short `unit` (≤8 chars), a plausible positive `whPerUnit` for one unit,
+and an icon from: `phone`, `car`, `kettle`, `laptop`, `led`, `ac`, `fan`,
+`fridge`, `rice`, `washer`, `tv`, `coffee`, `battery`, `bike`, `game`, `music`,
+`projector`, `train`, `wifi`, `sparkles`. Vary category and energy scale; aim
+for rendered counts around 0.1–9999. The page computes the result from
+`whPerUnit`; do not send the precomputed count. Before encoding, verify there
+are no `<...>` placeholders, all `whPerUnit` values are JSON numbers, and all
+three labels differ. For scale selection, rough kWh is `totalTokens ×
+whPerThousand / 1,000,000`; with token breakdown use `(input×0.3 + output×0.9
++ cacheCreation×0.3 + cacheRead×0.03) / 1,000,000`.
 
 ## Step 3 — Fill the template and share
 

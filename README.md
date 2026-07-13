@@ -1,13 +1,13 @@
 # aitokenweight Token 消耗计算器
 
-一个两页式 Token 能耗海报生成器。第一页只输入 Token 总量和开发者名称，第二页生成可分享的结果海报，并支持随机切换常见能源表达方式、复制摘要和导出 PNG。
+一个两页式 Token 能耗海报生成器。Agent 会根据每次真实用量即兴创作文案和 3 个能耗类比；手填模式则从本地趣味表达池生成。支持复制摘要和导出 PNG。
 
 ## 快速开始（三选一）
 
 **① 把这段话发给你的 AI**——指令自带降级方案，任何 agent 都能走通，收到后它会回你一张填好的海报链接：
 
 ```text
-读取 https://susyimes.github.io/aitokenweight/agent.md 并按其执行，帮我生成今日 token 消耗海报
+读取 https://susyimes.github.io/aitokenweight/agent.md 并严格按其执行：查询我今天的 token 消耗，结合实际用量即兴创作海报文案和 3 个不重复的有趣能耗类比，最后返回填好的海报链接。
 ```
 
 （网页首页也有一键复制这段指令的卡片；只发裸链接 `https://susyimes.github.io/aitokenweight/` 也可以，页面里埋了同样的指令，但部分 agent 会先反问一句。）
@@ -28,7 +28,8 @@ npx aitokenweight
 
 - 极简输入页：Token 总量、开发者名称
 - 结果海报页：Token 总量、等效电量、开发者百分位、趋势
-- 随机能源表达：手机充电、电动车续航、空调运行、LED 点亮、冰箱运行等
+- Agent 动态表达：每张海报现写 `funLine`、`verdict`、`energyLine`，并给出 3 个新能耗类比
+- 手填兼容：从“洗掉一桶班味”“让路由器通宵值班”等本地趣味表达中随机抽取
 - 根据 token 总量生成开发者百分位、等级和本周趋势
 - 本地保存数据，支持复制摘要、换一组表达、导出 PNG
 - Agent Skill URL：通过 ANP-style `.well-known` 入口暴露 skill manifest、MCP-style action schema 和海报模板 URL

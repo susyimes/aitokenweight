@@ -56,10 +56,12 @@ user explicitly asks for an image file. The link renders the poster by itself.
    CLI, etc.). Cloud/sandboxed agents: your sandbox has no user transcripts —
    running ccusage there will find nothing; use method 1 instead. On the
    user's machine, `npx -y aitokenweight@latest --json --no-open` prints
-   `{"status":"rendered",...}` whose `posterPath` already is the finished
-   poster URL with daily totals and 7-day history — skip straight to Step 4
-   (pass `--handle <name>` to set the poster name). Or read transcripts
-   yourself: `npx -y ccusage@latest daily --json`, take today's `agent: "all"`
+   `{"status":"rendered",...}` whose `posterPath` contains the exact daily
+   totals and 7-day history. Decode that URL's `data` payload, keep its usage
+   fields, then **continue to Step 2 and enrich it with your own fresh creative
+   fields** before sharing it. Do not return the CLI's un-enriched link. Pass
+   `--handle <name>` to set the poster name. Or read transcripts yourself with
+   `npx -y ccusage@latest daily --json`, take today's `agent: "all"`
    entry, map `inputTokens`, `outputTokens`, `cacheCreationTokens`,
    `cacheReadTokens`, `totalTokens`, `history = last ≤7 days of totalTokens`,
    `source: "local_log"`.
@@ -95,7 +97,14 @@ and stop. Do not build a poster URL.
   "totalTokens": 0,
   "history": [0],
   "scope": "day",
-  "funLine": "≈ 读完 63 本《红楼梦》的文字量",
+  "funLine": "≈ <a fresh metaphor for this exact token volume>",
+  "verdict": "<a short punchline about today's usage>",
+  "energyLine": "<a short bridge from the work to its energy>",
+  "energyComparisons": [
+    {"label": "<invent label 1>", "unit": "<unit>", "whPerUnit": "<replace with a positive number>", "icon": "<icon>"},
+    {"label": "<invent label 2>", "unit": "<unit>", "whPerUnit": "<replace with a different positive number>", "icon": "<icon>"},
+    {"label": "<invent label 3>", "unit": "<unit>", "whPerUnit": "<replace with a third positive number>", "icon": "<icon>"}
+  ],
   "source": "local_log",
   "usageEvidence": "<the exact command, API, or log you used>"
 }
@@ -105,11 +114,47 @@ and stop. Do not build a poster URL.
 fallback — the poster will say so). Omit `history` when you only know the
 session numbers.
 
-`funLine` (optional, ≤48 chars): write ONE creative equivalence of your own
-for this token volume — rendered verbatim under the big number. Be vivid and
-match the magnitude, e.g. “≈ 把《三体》三部曲通读 9 遍”,
-“≈ 让莎士比亚全集重写 4 遍”, “≈ 一口气看完 20 万条弹幕”. Start it with “≈ ”.
-Omit the field and the page falls back to its default (《红楼梦》 volumes).
+### Creative presentation — mandatory and new every time
+
+Do not stop after filling the usage numbers. For **this exact report**, create
+all four fields below from scratch. Never copy the placeholder text above, the
+examples in this document, or a previous poster. Do not send `metricIds`; that
+is a legacy fallback and produces the fixed cards the user explicitly does not
+want.
+
+- `funLine` (≤48 chars, begins with `≈`): one vivid token-volume metaphor,
+  rendered under the big number.
+- `verdict` (≤36 chars): one playful verdict tailored to the usage magnitude.
+  Do not include surrounding quote marks; the page adds them.
+- `energyLine` (≤48 chars): one playful sentence connecting today's work to
+  the computed energy. Do not repeat `funLine`.
+- `energyComparisons`: exactly **3 distinct objects** that you invent for this
+  report. Each object contains:
+  - `label`: concise playful Chinese label, 18 chars max;
+  - `unit`: display unit, 8 chars max;
+  - `whPerUnit`: positive, defensible approximate watt-hours consumed by ONE
+    unit of that real-world activity/device. The page performs the division;
+    do not put the already-calculated count here;
+  - `icon`: choose one of `phone`, `car`, `kettle`, `laptop`, `led`, `ac`,
+    `fan`, `fridge`, `rice`, `washer`, `tv`, `coffee`, `battery`, `bike`,
+    `game`, `music`, `projector`, `train`, `wifi`, `sparkles`.
+
+Make the three comparisons visually different and use different energy scales
+(small gadget, everyday appliance, larger journey/activity works well). Choose
+references that make the displayed result readable for this magnitude, roughly
+0.1–9999 units when possible. Humor belongs in `label`; keep `whPerUnit`
+grounded in a plausible common-device estimate. The energy estimate is for fun,
+but its arithmetic must stay internally consistent.
+
+To choose useful scales, approximate the page's kWh as
+`totalTokens × whPerThousand / 1,000,000`. When the four token breakdown fields
+are present, use `(input×0.3 + output×0.9 + cacheCreation×0.3 +
+cacheRead×0.03) / 1,000,000` instead. A card's displayed count is
+`kWh × 1000 / whPerUnit`.
+
+Before encoding, assert that no `<...>` placeholder remains, all three
+`whPerUnit` values are JSON numbers (not strings), and all three labels are
+different. If any check fails, rewrite the creative fields first.
 
 `totalTokens`, `date`, `timezone`, `provider`, `handle`, `source` are required.
 Full schema: [.well-known/schemas/daily-token-usage.schema.json](./.well-known/schemas/daily-token-usage.schema.json)

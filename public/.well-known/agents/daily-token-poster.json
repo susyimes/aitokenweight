@@ -9,7 +9,7 @@
     "name": "susyimes",
     "url": "https://github.com/susyimes"
   },
-  "description": "ANP-facing entrypoint for a skill that collects daily AI token usage, normalizes it, and renders an aitokenweight share poster. ANP provides discovery, identity, capability description, and invocation metadata; token collection and image rendering are application-level skill actions.",
+  "description": "ANP-facing entrypoint for a skill that collects daily AI token usage, writes fresh usage-aware copy and energy comparisons, and renders an aitokenweight share poster. ANP provides discovery, identity, capability description, and invocation metadata; token collection and rendering are application-level skill actions.",
   "created": "2026-07-02T00:00:00Z",
   "securityDefinitions": {
     "user_grant": {

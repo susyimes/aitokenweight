@@ -54,14 +54,21 @@ The poster URL consumes a `DailyTokenUsage` object:
   "cacheReadTokens": 0,
   "totalTokens": 8620000,
   "whPerThousand": 0.4,
-  "metricIds": ["phone", "ev", "kettle"],
   "history": [4137600, 4913400, 3620400, 6034000, 4568600, 7068400, 8620000],
+  "funLine": "≈ <fresh metaphor for this usage>",
+  "verdict": "<fresh magnitude-aware punchline>",
+  "energyLine": "<fresh energy bridge>",
+  "energyComparisons": [
+    {"label":"<invent label 1>","unit":"<unit>","whPerUnit":"<positive number>","icon":"<icon>"},
+    {"label":"<invent label 2>","unit":"<unit>","whPerUnit":"<different positive number>","icon":"<icon>"},
+    {"label":"<invent label 3>","unit":"<unit>","whPerUnit":"<third positive number>","icon":"<icon>"}
+  ],
   "source": "agent_runtime",
   "usageEvidence": "Current session final usage line or API usage object"
 }
 ```
 
-If `metricIds` or `history` are omitted, the template uses stable defaults. `totalTokens` is preferred. If it is absent, the page can derive a total from `inputTokens + outputTokens + cacheCreationTokens + cacheReadTokens`.
+Agent-generated links must replace every creative placeholder and supply all four presentation fields plus exactly three distinct comparisons. `metricIds` is a deprecated legacy/manual fallback. If creative fields are missing, the page still renders older links with deterministic local copy. If `history` is omitted, the template derives a fallback trend. `totalTokens` is preferred; if absent, the page can derive it from `inputTokens + outputTokens + cacheCreationTokens + cacheReadTokens`.
 
 The numbers above are documentation examples only. A remote agent must not reuse them as defaults. Before rendering, the agent must read `/.well-known/prompts/current-token-usage.md` and obtain exact usage evidence for its current run/session. If exact usage is not available, it must return `usage_unavailable` and skip rendering.
 
@@ -76,6 +83,7 @@ skill link
   -> ask the user for token_usage:read before collecting provider or local usage
   -> find exact current run/session usage evidence
   -> normalize to DailyTokenUsage
+  -> invent fresh funLine, verdict, energyLine, and 3 energyComparisons
   -> encode DailyTokenUsage as base64url JSON
   -> open /?poster=1&data=<payload>
   -> screenshot .report-poster
